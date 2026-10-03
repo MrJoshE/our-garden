@@ -3,6 +3,7 @@
   import { ISSUE_KINDS, ISSUE_STATUSES, SEVERITIES } from '../lib/constants.js';
   import { daysSince } from '../lib/dates.js';
   import { app, reportError, showToast } from '../lib/state/app.svelte.js';
+  import { openSheet } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
 
   /** @type {{ issue: Record<string, any> }} */
@@ -52,7 +53,12 @@
     </span>
     <span>{strings.issues.seen(daysSince(issue.firstSeenOn, app.today))}</span>
   </p>
-  <h3 class="title" id={titleId}>{issue.title}</h3>
+  <!-- The title is a button stretched over the card, so a tap anywhere opens it for editing -->
+  <h3 class="title" id={titleId}>
+    <button class="issue-open" type="button" aria-label={strings.issues.edit(issue.title)} onclick={() => openSheet(`edit-issue:${issue.id}`)}>
+      {issue.title}
+    </button>
+  </h3>
   {#if issue.notes}<p class="prose text-sm">{issue.notes}</p>{/if}
   <div class="cluster">
     {#each moves as { to, label } (to)}

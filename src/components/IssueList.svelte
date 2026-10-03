@@ -2,8 +2,10 @@
   import Icon from './Icon.svelte';
   import IssueCard from './IssueCard.svelte';
   import IssueSheet from './IssueSheet.svelte';
+  import { deleteIssue, restoreIssue } from '../lib/db/index.js';
   import { ACTIVE_ISSUE_STATUSES } from '../lib/constants.js';
-  import { openSheet, route } from '../lib/state/router.svelte.js';
+  import { reportError, showToast } from '../lib/state/app.svelte.js';
+  import { closeSheet, openSheet, route } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
 
   /**
@@ -17,6 +19,25 @@
   const active = $derived(issues.filter((issue) => ACTIVE_ISSUE_STATUSES.includes(issue.status)));
   const resolved = $derived(issues.filter((issue) => !ACTIVE_ISSUE_STATUSES.includes(issue.status)));
   let showResolved = $state(false);
+
+  // The problem open in the edit sheet, named by the sheet's history entry
+  const editing = $derived(issues.find((issue) => route.sheet === `edit-issue:${issue.id}`));
+
+  /** @param {Record<string, any>} issue */
+  async function remove(issue) {
+    closeSheet();
+    try {
+      const deletedAt = await deleteIssue(issue.id);
+      showToast(strings.toasts.problemDeleted, {
+        action: {
+          label: strings.actions.undo,
+          run: () => restoreIssue(issue.id, deletedAt).catch((error) => reportError(error, { operation: 'restoreIssue', issueId: issue.id }))
+        }
+      });
+    } catch (error) {
+      reportError(error, { operation: 'deleteIssue', issueId: issue.id });
+    }
+  }
 </script>
 
 <section class="stack stack-sm" aria-labelledby={headingId}>
@@ -52,6 +73,7 @@
 </section>
 
 <IssueSheet open={route.sheet === 'add-issue'} {plantId} />
+<IssueSheet open={!!editing} {plantId} issue={editing} onDelete={remove} />
 
 <style>
   /* The fold sits at the start of the column, like the cards above it */
