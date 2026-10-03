@@ -1,15 +1,10 @@
 <script>
-  import { strings } from '../lib/strings.js';
+  import { recoveryButtons } from '../lib/errors.js';
 
   /** @type {{ problem: import('../lib/errors.js').Explanation, onRetry?: () => void }} */
   let { problem, onRetry } = $props();
 
-  const buttons = $derived(
-    [
-      onRetry && problem.actions.includes('retry') && { label: strings.actions.retry, run: onRetry },
-      problem.actions.includes('reload') && { label: strings.actions.reload, run: () => location.reload() }
-    ].filter((button) => !!button)
-  );
+  const buttons = $derived(recoveryButtons(problem, onRetry));
 </script>
 
 <main class="page page-narrow">

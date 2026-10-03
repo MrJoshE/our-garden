@@ -133,6 +133,22 @@ export const strings = {
     plantDeleted: 'Plant deleted'
   },
 
+  dates: {
+    today: 'Today',
+    yesterday: 'Yesterday'
+  },
+
+  timeline: {
+    title: 'Timeline',
+    empty: {
+      title: 'Nothing recorded yet',
+      message: 'Checks, notes and photos appear here, newest first.'
+    },
+    product: 'Product',
+    edited: 'Edited',
+    earlier: 'Show earlier'
+  },
+
   installHint: {
     title: 'Add Garden Journal to your Home Screen first, so your journal is kept safe',
     steps: 'Tap the Share button, choose Add to Home Screen, then open Garden Journal from your Home Screen.'

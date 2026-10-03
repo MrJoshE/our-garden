@@ -73,3 +73,20 @@ export function explainError(error) {
   if (has('DatabaseClosedError') || has('VersionChangeError')) return describeProblem('closed');
   return describeProblem('unknown');
 }
+
+/** @typedef {{ label: string, run: () => void }} RecoveryButton */
+
+/**
+ * The buttons to offer with a problem: Try again where there is something to
+ * retry, and Reload where reloading helps.
+ * @param {Explanation} problem
+ * @param {() => void} [onRetry]
+ * @returns {RecoveryButton[]}
+ */
+export function recoveryButtons(problem, onRetry) {
+  /** @type {RecoveryButton[]} */
+  const buttons = [];
+  if (onRetry && problem.actions.includes('retry')) buttons.push({ label: strings.actions.retry, run: onRetry });
+  if (problem.actions.includes('reload')) buttons.push({ label: strings.actions.reload, run: () => location.reload() });
+  return buttons;
+}

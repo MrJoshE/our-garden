@@ -2,7 +2,7 @@
   import { untrack } from 'svelte';
   import Field from './Field.svelte';
   import Icon from './Icon.svelte';
-  import FormProblem from './FormProblem.svelte';
+  import InlineProblem from './InlineProblem.svelte';
   import Sheet from './Sheet.svelte';
   import { createPlant, getDraft, getPlant, updatePlant } from '../lib/db/index.js';
   import { LIMITS, PLANT_STATUSES } from '../lib/constants.js';
@@ -124,7 +124,7 @@
 
 <Sheet {open} title={plantId ? strings.plantSheet.editTitle : strings.plantSheet.addTitle} onsubmit={submit}>
   <div class="stack">
-    {#if problem}<FormProblem {problem} />{/if}
+    {#if problem}<InlineProblem {problem} />{/if}
     <Field
       label={strings.plantSheet.commonName}
       name="commonName"

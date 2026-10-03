@@ -2,7 +2,7 @@
   import { untrack } from 'svelte';
   import Field from './Field.svelte';
   import Icon from './Icon.svelte';
-  import FormProblem from './FormProblem.svelte';
+  import InlineProblem from './InlineProblem.svelte';
   import Sheet from './Sheet.svelte';
   import { createGarden, deleteGarden, findStartGardenId, updateGarden } from '../lib/db/index.js';
   import { GARDEN_STATUSES, LIMITS } from '../lib/constants.js';
@@ -98,7 +98,7 @@
 
 <Sheet {open} title={garden ? strings.gardenSheet.editTitle : strings.gardenSheet.addTitle} onsubmit={submit}>
   <div class="stack">
-    {#if problem}<FormProblem {problem} />{/if}
+    {#if problem}<InlineProblem {problem} />{/if}
     <Field label={strings.gardenSheet.name} name="name" autocomplete="off" maxlength={LIMITS.name} bind:value={values.name} error={errors.name} />
     {#if garden}
       <Field label={strings.gardenSheet.status} name="status" options={statusOptions} bind:value={values.status} error={errors.status} />

@@ -415,7 +415,13 @@
   .split { display: grid; gap: var(--space-6); }
   @container page (min-width: 860px) {
     .split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; gap: var(--space-8); }
-    .split > .split-aside { position: sticky; top: calc(var(--appbar-height) + var(--space-4)); }
+    /* The details stay in view beside a long timeline. When they are taller
+       than the window, they scroll until their end shows, then stay. Set
+       --aside-height to the column's measured height. */
+    .split > .split-aside {
+      position: sticky;
+      top: min(calc(var(--appbar-height) + var(--space-4)), calc(100dvh - var(--aside-height, 0px) - var(--space-4)));
+    }
   }
 
   /* A horizontally scrolling row (filter chips on a narrow phone) */
@@ -968,8 +974,8 @@
   .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-1); border-radius: var(--radius-md); overflow: hidden; }
   .photo-grid[data-count='1'] { grid-template-columns: 1fr; }
   .photo-grid[data-count='2'] { grid-template-columns: 1fr 1fr; }
-  .photo-grid button { position: relative; aspect-ratio: 1; background: var(--color-surface-sunken); overflow: hidden; }
-  .photo-grid[data-count='1'] button { aspect-ratio: 4 / 3; }
+  .photo-grid > * { position: relative; aspect-ratio: 1; background: var(--color-surface-sunken); overflow: hidden; }
+  .photo-grid[data-count='1'] > * { aspect-ratio: 4 / 3; }
   .photo-grid img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out); }
   .photo-grid button:active img { transform: scale(0.97); }
   .photo-grid .more { position: absolute; inset: 0; display: grid; place-items: center; background: rgb(31 43 37 / 0.55); color: #fff; font-weight: var(--weight-bold); font-size: var(--text-lg); }
@@ -1157,7 +1163,7 @@
     animation: fade-in var(--dur-slow) var(--ease-out) both;
   }
   .empty > svg { width: 72px; height: 72px; color: var(--sage-300); }
-  .empty :is(h1, h2) { color: var(--color-text); }
+  .empty :is(h1, h2, h3) { color: var(--color-text); }
   /* A whole-page message (such as "can't save in this browser") is the page's
      main heading but should not be display size */
   .empty h1 { font-size: var(--text-2xl); }

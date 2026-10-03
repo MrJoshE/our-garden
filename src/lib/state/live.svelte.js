@@ -20,6 +20,11 @@ const SLOW_MS = 150;
  * (Dexie sometimes starts a query a moment later, where Svelte could not
  * tell that it depended on gardenId.)
  *
+ * When the input names another record, the old value is cleared so it never
+ * shows while the new one loads. An input can be a list whose first value
+ * names the record, such as [plantId, limit]: asking for more of the same
+ * record keeps what is shown until the rest arrives.
+ *
  * @template I, T
  * @param {() => I} input
  * @param {(input: I) => Promise<T>} query a read function from lib/db
@@ -39,16 +44,16 @@ export function live(input, query) {
     }
   });
 
-  /** @type {I | undefined} */
+  /** @type {unknown} */
   let previous;
 
   $effect(() => {
     restored;
     attempt;
     const args = input();
-    // Another garden or plant: don't show the old one while the new one loads
-    if (!Object.is(args, previous)) state.value = undefined;
-    previous = args;
+    const record = Array.isArray(args) ? args[0] : args;
+    if (!Object.is(record, previous)) state.value = undefined;
+    previous = record;
     state.loading = true;
     state.error = null;
     const slowTimer = setTimeout(() => (state.slow = state.loading), SLOW_MS);
