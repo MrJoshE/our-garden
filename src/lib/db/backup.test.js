@@ -7,8 +7,11 @@ import {
   createPlant,
   exportJournal,
   getCurrentPerson,
+  getMeta,
   importJournal,
   saveDraft,
+  setMeta,
+  shouldRemindBackup,
   updatePlant
 } from './index.js';
 import { makePhoto, resetDatabase, startGarden } from '../../test/helpers.js';
@@ -197,5 +200,67 @@ describe('backup import', () => {
 
     expect(summary).toEqual({ added: {}, updated: {}, skipped: 3 });
     expect(await db.plants.count()).toBe(0);
+  });
+});
+
+describe('backup reminder', () => {
+  const DAY = 86_400_000;
+  /** @param {number} days from now, negative for the past */
+  const daysFromNow = (days) => new Date(Date.now() + days * DAY);
+
+  it('reminds when the last backup was over 30 days ago and she has written since', async () => {
+    const { plantId } = await startGarden();
+    await setMeta('lastBackupAt', daysFromNow(-31).toISOString());
+    await createEntry(plantId, { note: 'Flowering' });
+
+    expect(await shouldRemindBackup()).toBe(true);
+  });
+
+  it('does not remind when the last backup was recent', async () => {
+    const { plantId } = await startGarden();
+    await setMeta('lastBackupAt', daysFromNow(-10).toISOString());
+    await createEntry(plantId, { note: 'Flowering' });
+
+    expect(await shouldRemindBackup()).toBe(false);
+  });
+
+  it('does not remind when nothing has been written since the last backup', async () => {
+    const { plantId } = await startGarden();
+    const entry = await db.entries.get(await createEntry(plantId, { note: 'Flowering' }));
+    await setMeta('lastBackupAt', new Date(Date.parse(entry?.createdAt) + 1).toISOString());
+
+    expect(await shouldRemindBackup(daysFromNow(31))).toBe(false);
+  });
+
+  it('counts from when the journal began if she has never backed up', async () => {
+    const { plantId } = await startGarden();
+    await createEntry(plantId, { note: 'Flowering' });
+
+    expect(await shouldRemindBackup(daysFromNow(10))).toBe(false);
+    expect(await shouldRemindBackup(daysFromNow(31))).toBe(true);
+  });
+
+  it('reminds once, and again only after a later backup goes stale', async () => {
+    const { plantId } = await startGarden();
+    await setMeta('lastBackupAt', daysFromNow(-31).toISOString());
+    await createEntry(plantId, { note: 'Flowering' });
+    await setMeta('backupReminderShownAt', new Date().toISOString());
+
+    expect(await shouldRemindBackup()).toBe(false);
+
+    await setMeta('lastBackupAt', daysFromNow(1).toISOString());
+    await db.entries.toCollection().modify({ createdAt: daysFromNow(2).toISOString() });
+    expect(await shouldRemindBackup(daysFromNow(32))).toBe(true);
+  });
+
+  it('counts a restore as the last backup on a device that has never backed up', async () => {
+    await startGarden();
+    const { zip } = await exportJournal();
+    const { exportedAt } = JSON.parse(strFromU8((await unzip(zip))['garden-journal.json']));
+    await resetDatabase();
+
+    await importJournal(zip);
+
+    expect(await getMeta('lastBackupAt')).toBe(exportedAt);
   });
 });

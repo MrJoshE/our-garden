@@ -1,14 +1,14 @@
 <script>
   import { onMount } from 'svelte';
   import { startDatabase } from './lib/db/index.js';
-  import { app, block, checkStorage, reportError } from './lib/state/app.svelte.js';
+  import { app, block, checkBackupReminder, checkStorage, reportError } from './lib/state/app.svelte.js';
   import { paths, route } from './lib/state/router.svelte.js';
   import { explainError } from './lib/errors.js';
   import { strings } from './lib/strings.js';
   import ProblemBanner from './components/ProblemBanner.svelte';
   import ProblemScreen from './components/ProblemScreen.svelte';
   import SettingsSheet from './components/SettingsSheet.svelte';
-  import StorageBanner from './components/StorageBanner.svelte';
+  import SettingsBanner from './components/SettingsBanner.svelte';
   import Toasts from './components/Toasts.svelte';
   import NotFound from './components/NotFound.svelte';
   import Start from './pages/Start.svelte';
@@ -32,6 +32,7 @@
     if (app.blocking?.kind === 'blocked') app.blocking = null;
     ready = true;
     checkStorage();
+    checkBackupReminder();
   });
 </script>
 
@@ -41,7 +42,23 @@
   {#if app.problem}
     <ProblemBanner problem={app.problem} onDismiss={() => (app.problem = null)} />
   {:else if app.storageLow}
-    <StorageBanner />
+    <!-- Shown again after the next photos are saved, if the device is still nearly full -->
+    <SettingsBanner
+      tone="attention"
+      title={strings.storage.title}
+      message={strings.storage.message}
+      action={strings.settings.title}
+      onDismiss={() => (app.storageLow = false)}
+    />
+  {:else if app.backupReminder}
+    <SettingsBanner
+      tone="info"
+      title={strings.backupReminder.title}
+      message={strings.backupReminder.message}
+      action={strings.backupReminder.action}
+      onDismiss={() => (app.backupReminder = false)}
+      closeOnAction
+    />
   {/if}
   <svelte:boundary onerror={(error) => reportError(error, { operation: 'render' })}>
     {#if route.name === 'start'}
@@ -58,7 +75,7 @@
       <ProblemScreen problem={explainError(error)} onRetry={reset} />
     {/snippet}
   </svelte:boundary>
-  <!-- Here, not on a page, because the storage banner opens it from anywhere -->
+  <!-- Here, not on a page, because the banners open it from anywhere -->
   <SettingsSheet open={route.sheet === 'settings'} />
 {/if}
 

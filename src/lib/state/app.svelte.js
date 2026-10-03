@@ -4,6 +4,7 @@
 import { today } from '../dates.js';
 import { describeProblem, explainError } from '../errors.js';
 import { logError } from '../log.js';
+import { setMeta, shouldRemindBackup } from '../db/index.js';
 
 /**
  * @typedef {object} Toast
@@ -29,7 +30,9 @@ export const app = $state({
   /** Today's date, which moves on at midnight so words such as "Today" stay right */
   today: today(),
   /** The device's storage is more than 80% full (brief section 11) */
-  storageLow: false
+  storageLow: false,
+  /** Time for the once-only backup reminder (brief section 16) */
+  backupReminder: false
 });
 
 export const STORAGE_WARNING_SHARE = 0.8;
@@ -52,6 +55,17 @@ export async function storageEstimate() {
 export async function checkStorage() {
   const estimate = await storageEstimate();
   app.storageLow = !!estimate && estimate.usage / estimate.quota > STORAGE_WARNING_SHARE;
+}
+
+/** Shows the backup reminder if it's due. Call once on start. */
+export async function checkBackupReminder() {
+  try {
+    if (!(await shouldRemindBackup())) return;
+    app.backupReminder = true;
+    await setMeta('backupReminderShownAt', new Date().toISOString());
+  } catch (error) {
+    logError(error, { operation: 'checkBackupReminder', tables: ['meta', 'people', 'entries'] });
+  }
 }
 
 function followTheDate() {

@@ -35,6 +35,9 @@ export const LIMITS = Object.freeze({ name: 120, note: 5000, photosPerEntry: 10 
 /** Days after a photo is deleted before its image data is removed */
 export const PHOTO_PURGE_DAYS = 30;
 
+/** Days without a backup before she's reminded, if she has written since */
+export const BACKUP_REMINDER_DAYS = 30;
+
 export const COVER_TINTS = /** @type {const} */ (['rose', 'sage', 'rain', 'lavender', 'primrose']);
 
 /**
