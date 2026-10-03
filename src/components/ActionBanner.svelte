@@ -1,25 +1,19 @@
 <script>
   import Icon from './Icon.svelte';
-  import { openSheet } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
 
   /**
-   * A banner whose button opens Backup and settings.
+   * A banner with one action button and a dismiss button.
    * @type {{
    *   tone: string,
    *   title: string,
    *   message: string,
    *   action: string,
-   *   onDismiss: () => void,
-   *   closeOnAction?: boolean
+   *   onAction: () => void,
+   *   onDismiss: () => void
    * }}
    */
-  let { tone, title, message, action, onDismiss, closeOnAction = false } = $props();
-
-  function act() {
-    if (closeOnAction) onDismiss();
-    openSheet('settings');
-  }
+  let { tone, title, message, action, onAction, onDismiss } = $props();
 </script>
 
 <div class="banner-area">
@@ -28,7 +22,7 @@
       <strong>{title}</strong>
       {message}
       <div class="mt-2">
-        <button class="btn btn-sm" type="button" onclick={act}>{action}</button>
+        <button class="btn btn-sm" type="button" onclick={onAction}>{action}</button>
       </div>
     </div>
     <button class="btn btn-icon btn-quiet" type="button" aria-label={strings.actions.dismiss} onclick={onDismiss}>

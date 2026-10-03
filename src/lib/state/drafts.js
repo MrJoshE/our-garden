@@ -3,6 +3,14 @@ import { logError } from '../log.js';
 
 const SAVE_EVERY_MS = 500;
 
+/** The save of every draft whose changes are waiting on its timer */
+const waiting = new Set();
+
+/** Saves every draft that has changes waiting, such as before the app reloads to update. */
+export function saveWaitingDrafts() {
+  return Promise.all([...waiting].map((save) => save()));
+}
+
 /**
  * Keeps a form's contents as a draft while it is open (brief section 7): at
  * most every half second while she types, and straight away when the page
@@ -17,7 +25,8 @@ export function keepDraft(key, read) {
   function save() {
     clearTimeout(timer);
     timer = undefined;
-    saveDraft(key, read()).catch((error) => logError(error, { operation: 'saveDraft' }));
+    waiting.delete(save);
+    return saveDraft(key, read()).catch((error) => logError(error, { operation: 'saveDraft' }));
   }
   function saveIfHidden() {
     if (document.visibilityState === 'hidden' && timer) save();
@@ -27,7 +36,9 @@ export function keepDraft(key, read) {
   return {
     /** Call when a value changes. */
     changed() {
-      if (!timer) timer = setTimeout(save, SAVE_EVERY_MS);
+      if (timer) return;
+      timer = setTimeout(save, SAVE_EVERY_MS);
+      waiting.add(save);
     },
     /** Saves anything pending and stops watching, keeping the draft for next time. */
     stop() {
@@ -41,6 +52,7 @@ export function keepDraft(key, read) {
     async discard() {
       clearTimeout(timer);
       timer = undefined;
+      waiting.delete(save);
       await clearDraft(key);
     }
   };
