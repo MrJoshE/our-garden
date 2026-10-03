@@ -11,6 +11,6 @@
     "lib": ["es2023", "dom"],
     "types": ["svelte"]
   },
-  "include": ["src/lib/**/*.js"],
+  "include": ["src/lib/**/*.js", "src/lib/**/*.d.ts"],
   "exclude": ["src/**/*.test.js"]
 }

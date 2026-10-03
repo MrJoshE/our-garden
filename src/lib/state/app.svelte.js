@@ -32,16 +32,26 @@ export const app = $state({
   storageLow: false
 });
 
-const STORAGE_WARNING_SHARE = 0.8;
+export const STORAGE_WARNING_SHARE = 0.8;
+
+/**
+ * How much of the device's space the journal uses, if the browser says.
+ * @returns {Promise<{ usage: number, quota: number } | null>}
+ */
+export async function storageEstimate() {
+  try {
+    const estimate = await navigator.storage?.estimate?.();
+    return estimate?.quota ? { usage: estimate.usage ?? 0, quota: estimate.quota } : null;
+  } catch (error) {
+    logError(error, { operation: 'storageEstimate' });
+    return null;
+  }
+}
 
 /** Checks the space left, on start and after saving photos. */
 export async function checkStorage() {
-  try {
-    const { usage = 0, quota = 0 } = (await navigator.storage?.estimate?.()) ?? {};
-    app.storageLow = quota > 0 && usage / quota > STORAGE_WARNING_SHARE;
-  } catch (error) {
-    logError(error, { operation: 'checkStorage' });
-  }
+  const estimate = await storageEstimate();
+  app.storageLow = !!estimate && estimate.usage / estimate.quota > STORAGE_WARNING_SHARE;
 }
 
 function followTheDate() {

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { dayName, daysSince, formatDate, isDate, isFuture, localDate, today } from './dates.js';
+import { dayName, daysSince, formatDate, formatMoment, isDate, isFuture, localDate, today } from './dates.js';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -76,5 +76,11 @@ describe('dates', () => {
     expect(dayName('2026-10-02')).toBe('Yesterday');
     expect(dayName('2026-09-26')).toBe('Saturday 26 September');
     expect(dayName('2025-12-25')).toBe('Thursday 25 December 2025');
+  });
+
+  it('writes a moment out in local time', () => {
+    // 13:05 UTC is 14:05 in British Summer Time
+    expect(formatMoment('2026-10-03T13:05:00.000Z')).toBe('3 Oct, 14:05');
+    expect(formatMoment('2026-12-03T13:05:00.000Z')).toBe('3 Dec, 13:05');
   });
 });
