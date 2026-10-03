@@ -8,6 +8,7 @@
   import { back, openSheet, paths, route } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
   import AppBar from '../components/AppBar.svelte';
+  import CheckButton from '../components/CheckButton.svelte';
   import Icon from '../components/Icon.svelte';
   import Menu from '../components/Menu.svelte';
   import NotFound from '../components/NotFound.svelte';
@@ -133,7 +134,10 @@
         {/if}
       </div>
 
-      {#key details.id}<Timeline plantId={details.id} />{/key}
+      <div class="stack stack-lg">
+        <CheckButton plant={details} />
+        {#key details.id}<Timeline plantId={details.id} />{/key}
+      </div>
     </div>
   </main>
 

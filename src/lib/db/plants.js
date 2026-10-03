@@ -1,5 +1,6 @@
 import Dexie from 'dexie';
 import { db, current, isCurrent } from './schema.js';
+import { getMeta } from './meta.js';
 import { write } from './write.js';
 import { clean, date, longText, number, oneOf, ref, required, shortText, tags } from './fields.js';
 import { isActiveIssue } from './issues.js';
@@ -67,20 +68,21 @@ export async function listPlants(gardenId) {
 
 /**
  * One plant with `needsAttention`, `lastCheckedOn` (the date of its most
- * recent entry of any kind) and its `cover` photo (or null). Undefined if it
- * is missing or deleted.
+ * recent entry of any kind), `lastOwnCheckOn` (the date the person using this
+ * device last marked it "Checked today") and its `cover` photo (or null).
+ * Undefined if it is missing or deleted.
  * @param {string} id
  */
 export async function getPlant(id) {
   const plant = current(await db.plants.get(id));
   if (!plant) return undefined;
-  const [activeIssues, lastEntry, covers] = await Promise.all([
+  const newestFirst = () => db.entries.where('[plantId+occurredOn]').between([id, Dexie.minKey], [id, Dexie.maxKey]).reverse();
+  const personId = await getMeta('currentPersonId');
+  const [activeIssues, lastEntry, lastOwnCheck, covers] = await Promise.all([
     db.issues.where('plantId').equals(id).filter(isActiveIssue).count(),
-    db.entries
-      .where('[plantId+occurredOn]')
-      .between([id, Dexie.minKey], [id, Dexie.maxKey])
-      .reverse()
-      .filter(isCurrent)
+    newestFirst().filter(isCurrent).first(),
+    newestFirst()
+      .filter((entry) => isCurrent(entry) && entry.kind === 'checked' && entry.doneBy === personId)
       .first(),
     coversFor([plant])
   ]);
@@ -88,6 +90,7 @@ export async function getPlant(id) {
     ...plant,
     needsAttention: activeIssues > 0,
     lastCheckedOn: lastEntry?.occurredOn ?? null,
+    lastOwnCheckOn: lastOwnCheck?.occurredOn ?? null,
     cover: covers.get(id) ?? null
   };
 }
