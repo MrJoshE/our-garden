@@ -3,6 +3,7 @@
 
 import { ValidationError } from './db/fields.js';
 import { MissingRecordError, AutomaticEntryError } from './db/write.js';
+import { BackupError } from './db/backup.js';
 import { causesOf } from './log.js';
 import { strings } from './strings.js';
 
@@ -19,6 +20,8 @@ const RECOVERY = /** @type {const} */ ({
   unavailable: [],
   closed: ['reload'],
   blocked: [],
+  notBackup: [],
+  newerBackup: ['reload'],
   unknown: ['retry', 'reload']
 });
 
@@ -60,6 +63,7 @@ export function explainError(error) {
   }
   if (error instanceof MissingRecordError) return describeProblem('notFound');
   if (error instanceof AutomaticEntryError) return describeProblem('readOnly');
+  if (error instanceof BackupError) return describeProblem(error.reason);
 
   // Browser and Dexie errors are recognised by name, and are often wrapped
   // (a transaction abort caused by a full disk, for example).
