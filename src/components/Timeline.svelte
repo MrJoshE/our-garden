@@ -3,6 +3,7 @@
   import { SvelteSet } from 'svelte/reactivity';
   import EntrySheet from './EntrySheet.svelte';
   import InlineProblem from './InlineProblem.svelte';
+  import Lightbox from './Lightbox.svelte';
   import Photo from './Photo.svelte';
   import { deleteEntry, listEntries, listPeople, restoreEntry } from '../lib/db/index.js';
   import { ENTRY_KINDS } from '../lib/constants.js';
@@ -13,8 +14,11 @@
   import { closeSheet, openSheet, route } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
 
-  /** @type {{ plantId: string, issues: Record<string, any>[] }} issues: all the plant's issues */
-  let { plantId, issues } = $props();
+  /**
+   * @type {{ plantId: string, issues: Record<string, any>[], coverId: string | null }}
+   *   issues: all the plant's issues; coverId: the plant's cover photo
+   */
+  let { plantId, issues, coverId } = $props();
 
   const PAGE = 30;
   const SHOWN_PHOTOS = 3;
@@ -49,6 +53,16 @@
 
   // The entry open in the edit sheet, named by the sheet's history entry
   const editing = $derived(entries.value?.entries.find((entry) => route.sheet === `entry:${entry.id}`));
+
+  // The photo open in the lightbox, named by its history entry, with the entry it belongs to
+  const viewing = $derived.by(() => {
+    if (!route.sheet?.startsWith('photo:')) return undefined;
+    const photoId = route.sheet.slice('photo:'.length);
+    for (const entry of entries.value?.entries ?? []) {
+      const index = entry.photos.findIndex((/** @type {Record<string, any>} */ photo) => photo.id === photoId);
+      if (index >= 0) return { entry, index };
+    }
+  });
 
   // Entries on their way out play .is-leaving first (brief section 13)
   const leaving = new SvelteSet();
@@ -136,12 +150,17 @@
               <div class="photo-grid" data-count={shown.length}>
                 {#each shown as photo, i (photo.id)}
                   <!-- A photo whose image data was purged keeps its place, empty -->
-                  <div>
+                  <button
+                    type="button"
+                    data-photo={photo.id}
+                    aria-label={strings.lightbox.position(i + 1, entry.photos.length)}
+                    onclick={() => openSheet(`photo:${photo.id}`)}
+                  >
                     {#if photo.thumb}<Photo blob={photo.thumb} />{/if}
                     {#if i === SHOWN_PHOTOS - 1 && entry.photos.length > SHOWN_PHOTOS}
-                      <span class="more">+{entry.photos.length - SHOWN_PHOTOS}</span>
+                      <span class="more" aria-hidden="true">+{entry.photos.length - SHOWN_PHOTOS}</span>
                     {/if}
-                  </div>
+                  </button>
                 {/each}
               </div>
             {/if}
@@ -163,3 +182,4 @@
 </section>
 
 <EntrySheet entry={editing} {issues} onDelete={remove} />
+<Lightbox {viewing} {plantId} {coverId} />

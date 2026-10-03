@@ -199,6 +199,20 @@ export const strings = {
     message: 'Make a backup, then remove some old photos to free space, so new notes and photos can still be saved.'
   },
 
+  lightbox: {
+    label: 'Photos',
+    /**
+     * @param {number} n
+     * @param {number} total
+     */
+    position: (n, total) => `Photo ${n} of ${total}`,
+    previous: 'Previous photo',
+    next: 'Next photo',
+    useAsCover: 'Use as cover',
+    isCover: 'Cover photo',
+    coverChanged: 'Cover photo changed'
+  },
+
   photos: {
     add: 'Add photos',
     remove: 'Remove photo',

@@ -140,7 +140,7 @@
         <CheckButton plant={details} />
         {#key details.id}
           <EntryForm plantId={details.id} issues={issues.value ?? []} />
-          <Timeline plantId={details.id} issues={issues.value ?? []} />
+          <Timeline plantId={details.id} issues={issues.value ?? []} coverId={details.cover?.id ?? null} />
         {/key}
       </div>
     </div>
