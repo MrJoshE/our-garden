@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from './schema.js';
 import { MissingRecordError } from './write.js';
 import {
+  checkToday,
   createEntry,
   createGarden,
   createIssue,
@@ -114,6 +115,20 @@ describe('last checked', () => {
     await createEntry(plantId, { kind: 'watered', occurredOn: '2026-05-01' });
     await createIssue(plantId, { title: 'Slugs' });
     expect((await getPlant(plantId))?.lastCheckedOn).toBe(today());
+  });
+});
+
+describe('checked today', () => {
+  it('gives the date this person last marked the plant checked, ignoring other kinds and other people', async () => {
+    const { plantId } = await startGarden();
+    expect((await getPlant(plantId))?.lastOwnCheckOn).toBeNull();
+    await createEntry(plantId, { kind: 'watered' });
+    expect((await getPlant(plantId))?.lastOwnCheckOn).toBeNull();
+    await createEntry(plantId, { kind: 'checked', occurredOn: '2026-06-01' });
+    await createEntry(plantId, { kind: 'checked', occurredOn: '2026-06-05', doneBy: 'someone-else' });
+    expect((await getPlant(plantId))?.lastOwnCheckOn).toBe('2026-06-01');
+    await checkToday(plantId);
+    expect((await getPlant(plantId))?.lastOwnCheckOn).toBe(today());
   });
 });
 

@@ -571,11 +571,16 @@
   }
   @media (min-width: 900px) { .fab { display: none; } }
 
-  /* "Checked today" button. Add .is-done after a successful save. */
+  /* "Checked today" button. Add .is-done once the plant has been checked
+     today, and .is-new as well right after a tap, so only a check made now
+     pops and draws its tick, not one from earlier in the day. */
   .check-button { --check-color: var(--color-secondary); }
   .check-button .tick { width: 1.2em; height: 1.2em; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 0; }
-  .check-button.is-done { background: var(--color-secondary-soft); border-color: var(--sage-300); color: var(--sage-700); animation: pop var(--dur-slow) var(--ease-spring); }
-  .check-button.is-done .tick { animation: draw var(--dur-slow) var(--ease-out) both; }
+  .check-button.is-done { background: var(--color-secondary-soft); border-color: var(--sage-300); color: var(--sage-700); }
+  .check-button.is-done.is-new { animation: pop var(--dur-slow) var(--ease-spring); }
+  .check-button.is-done.is-new .tick { animation: draw var(--dur-slow) var(--ease-out) both; }
+  /* Keeps the done look under a pointer, where the primary button's hover would win */
+  @media (hover: hover) { .check-button.is-done:hover:not(:disabled) { background: var(--color-secondary-soft); border-color: var(--sage-500); } }
 
   /* ---- Segmented control and chips ------------------------------------ */
   .segmented {

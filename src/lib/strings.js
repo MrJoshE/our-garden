@@ -138,6 +138,24 @@ export const strings = {
     yesterday: 'Yesterday'
   },
 
+  check: {
+    button: 'Checked today',
+    already: 'Already checked today',
+    never: 'Nothing recorded yet',
+    /**
+     * @param {number} days since the plant's last entry
+     * @param {string} date that entry's date, written out
+     */
+    last: (days, date) =>
+      days <= 0
+        ? 'Last checked today'
+        : days === 1
+          ? 'Last checked yesterday'
+          : days < 14
+            ? `Last checked ${days} days ago`
+            : `Last checked ${date}`
+  },
+
   timeline: {
     title: 'Timeline',
     empty: {
