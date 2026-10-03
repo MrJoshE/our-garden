@@ -4,10 +4,13 @@
 import { tick } from 'svelte';
 import { explainError } from './errors.js';
 
-/** Moves focus to the first field marked invalid in the open sheet. */
-export async function focusFirstProblem() {
+/**
+ * Moves focus to the first field marked invalid.
+ * @param {Element | null} [form] the form, when it is not in the open sheet
+ */
+export async function focusFirstProblem(form = document.querySelector('dialog[open]')) {
   await tick();
-  /** @type {HTMLElement | null} */ (document.querySelector('dialog[open] [aria-invalid="true"]'))?.focus();
+  /** @type {HTMLElement | null | undefined} */ (form?.querySelector('[aria-invalid="true"]'))?.focus();
 }
 
 /**

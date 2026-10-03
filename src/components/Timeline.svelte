@@ -14,6 +14,9 @@
 
   const PAGE = 30;
   const SHOWN_PHOTOS = 3;
+  // Entries made after the timeline opened rise into place (brief section 13);
+  // ones loaded with Show earlier, or brought back by Undo, do not
+  const openedAt = new Date().toISOString();
 
   let limit = $state(PAGE);
   const entries = live(() => [plantId, limit], ([id, count]) => listEntries(/** @type {string} */ (id), /** @type {number} */ (count)));
@@ -68,7 +71,12 @@
         <h3 class="timeline-date">{dayName(day.date, app.today)}</h3>
         {#each day.entries as entry (entry.id)}
           {@const details = meta(entry)}
-          <article class="timeline-item" class:is-auto={entry.auto} data-kind={entry.kind}>
+          <article
+            class="timeline-item"
+            class:is-auto={entry.auto}
+            class:is-new={entry.createdAt > openedAt}
+            data-kind={entry.kind}
+          >
             <div class="entry-head">
               <!-- The app's own entries say what happened in their note, not their kind -->
               {#if entry.auto}

@@ -13,7 +13,6 @@ const SAVE_EVERY_MS = 500;
 export function keepDraft(key, read) {
   /** @type {ReturnType<typeof setTimeout> | undefined} */
   let timer;
-  let discarded = false;
 
   function save() {
     clearTimeout(timer);
@@ -28,16 +27,18 @@ export function keepDraft(key, read) {
   return {
     /** Call when a value changes. */
     changed() {
-      if (!discarded && !timer) timer = setTimeout(save, SAVE_EVERY_MS);
+      if (!timer) timer = setTimeout(save, SAVE_EVERY_MS);
     },
     /** Saves anything pending and stops watching, keeping the draft for next time. */
     stop() {
       document.removeEventListener('visibilitychange', saveIfHidden);
-      if (timer && !discarded) save();
+      if (timer) save();
     },
-    /** Removes the draft, once the form is saved or she cancels it. */
+    /**
+     * Removes the draft, once the form is saved or she cancels it. Changes
+     * made afterwards start a new draft, as in a form that stays open.
+     */
     async discard() {
-      discarded = true;
       clearTimeout(timer);
       timer = undefined;
       await clearDraft(key);

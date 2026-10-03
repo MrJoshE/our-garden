@@ -12,6 +12,7 @@
    *   hint?: string,
    *   maxlength?: number,
    *   optional?: boolean,
+   *   hideLabel?: boolean,
    *   multiline?: boolean,
    *   options?: { value: string, label: string }[]
    * } & Record<string, any>}
@@ -23,6 +24,7 @@
     hint = '',
     maxlength,
     optional = false,
+    hideLabel = false,
     multiline = false,
     options,
     ...rest
@@ -40,7 +42,8 @@
 </script>
 
 <div class="field" class:is-shaking={shaking} onanimationend={() => (shaking = false)}>
-  <label for={id}>
+  <!-- A hidden label is still read out, for a field whose placeholder says what it is for -->
+  <label for={id} class:sr-only={hideLabel}>
     {label}
     {#if optional}<span class="optional">{strings.form.optional}</span>{/if}
   </label>
