@@ -5,7 +5,7 @@
 
 const PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-const pad = (n, width = 2) => String(n).padStart(width, '0');
+const pad = (/** @type {number} */ n, width = 2) => String(n).padStart(width, '0');
 
 /**
  * @param {Date} [date]

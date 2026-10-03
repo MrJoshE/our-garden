@@ -5,6 +5,19 @@ const DB_NAME = 'garden-journal';
 /** The newest schema version. Keep it equal to the last db.version() below. */
 export const SCHEMA_VERSION = 1;
 
+/** @typedef {Record<string, any>} JournalRecord */
+/** @typedef {import('dexie').Table<JournalRecord, string>} RecordTable */
+/** @typedef {import('dexie').Table<{ key: string, [field: string]: any }, string>} KeyedTable */
+
+// Dexie adds a property for each table at runtime; this tells the checker.
+/**
+ * @typedef {Dexie & {
+ *   gardens: RecordTable, areas: RecordTable, plants: RecordTable, issues: RecordTable,
+ *   entries: RecordTable, photos: RecordTable, tasks: RecordTable, visits: RecordTable,
+ *   people: RecordTable, changes: RecordTable, drafts: KeyedTable, meta: KeyedTable
+ * }} Database
+ */
+
 /**
  * The database with every schema version.
  *
@@ -18,6 +31,7 @@ export const SCHEMA_VERSION = 1;
  *   });
  *
  * @param {string} [name]
+ * @returns {Database}
  */
 export function createDatabase(name = DB_NAME) {
   const db = new Dexie(name);
@@ -42,24 +56,22 @@ export function createDatabase(name = DB_NAME) {
   // A new database is created at the newest version and runs no upgrades.
   db.on('populate', (tx) => tx.table('meta').add({ key: 'schemaVersion', value: SCHEMA_VERSION }));
 
-  return db;
+  return /** @type {Database} */ (db);
 }
 
 export const db = createDatabase();
 
 /**
- * @template {{ deletedAt?: string | null }} T
- * @param {T | undefined} record
- * @returns {record is T} true for a record that exists and is not deleted
+ * @param {JournalRecord | undefined} record
+ * @returns {record is JournalRecord} true for a record that exists and is not deleted
  */
 export function isCurrent(record) {
   return record != null && record.deletedAt == null;
 }
 
 /**
- * @template {{ deletedAt?: string | null }} T
- * @param {T | undefined} record
- * @returns {T | undefined} the record, or undefined if it is missing or deleted
+ * @param {JournalRecord | undefined} record
+ * @returns {JournalRecord | undefined} the record, or undefined if it is missing or deleted
  */
 export function current(record) {
   return isCurrent(record) ? record : undefined;

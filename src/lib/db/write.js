@@ -51,6 +51,7 @@ function stamp() {
 /**
  * @param {any} a
  * @param {any} b
+ * @returns {boolean}
  */
 function same(a, b) {
   if (a == null && b == null) return true;
@@ -98,6 +99,7 @@ export class Writer {
    * @returns {Promise<Record<string, any>>}
    */
   async create(table, fields) {
+    /** @type {Record<string, any>} */
     const record = { ...fields, id: uuid(), createdAt: this.at, updatedAt: this.at, deletedAt: null, extra: {} };
     if (table === 'gardens') record.gardenId = record.id;
     await db.table(table).add(record);
@@ -155,10 +157,12 @@ export class Writer {
    * @param {Record<string, any>} record
    * @param {Record<string, any>} patch
    * @param {Action} action
+   * @returns {Promise<Record<string, any>>}
    */
   async #change(table, record, patch, action) {
     const fields = changedFields(record, patch);
     if (fields.length === 0) return record;
+    /** @type {Record<string, any>} */
     const next = { ...record, updatedAt: this.at };
     for (const field of fields) next[field] = patch[field];
     await db.table(table).put(next);
