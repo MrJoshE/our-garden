@@ -1,6 +1,6 @@
 <script>
   import Field from './Field.svelte';
-  import FormProblem from './FormProblem.svelte';
+  import InlineProblem from './InlineProblem.svelte';
   import InstallHint from './InstallHint.svelte';
   import Sheet from './Sheet.svelte';
   import { createFirstGarden } from '../lib/db/index.js';
@@ -45,7 +45,7 @@
   <div class="stack">
     <InstallHint />
     <p class="muted">{strings.welcome.intro}</p>
-    {#if problem}<FormProblem {problem} />{/if}
+    {#if problem}<InlineProblem {problem} />{/if}
     <Field
       label={strings.welcome.personName}
       name="personName"

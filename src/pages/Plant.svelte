@@ -14,12 +14,15 @@
   import Photo from '../components/Photo.svelte';
   import PlantSheet from '../components/PlantSheet.svelte';
   import ProblemScreen from '../components/ProblemScreen.svelte';
+  import Timeline from '../components/Timeline.svelte';
 
   const garden = live(() => route.gardenId ?? '', getGarden);
   const plant = live(() => route.plantId ?? '', getPlant);
 
   // A plant reached through another garden's address is not found here
   const found = $derived(plant.value && garden.value && plant.value.gardenId === garden.value.id);
+  let asideHeight = $state(0);
+
   // A photo whose image data was purged after deletion shows the sprig
   const coverImage = $derived(plant.value?.cover?.blob ?? plant.value?.cover?.thumb ?? null);
 
@@ -87,7 +90,7 @@
 
   <main class="page">
     <div class="split">
-      <div class="split-aside stack">
+      <div class="split-aside stack" bind:clientHeight={asideHeight} style:--aside-height="{asideHeight}px">
         <div class="hero-cover" data-cover={details.id}>
           {#if coverImage}
             <Photo blob={coverImage} />
@@ -129,6 +132,8 @@
           </ul>
         {/if}
       </div>
+
+      {#key details.id}<Timeline plantId={details.id} />{/key}
     </div>
   </main>
 

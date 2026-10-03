@@ -1,6 +1,7 @@
-// The only shared in-memory state (brief section 7): toasts, and any problem
-// the whole app has to show.
+// The only shared in-memory state (brief section 7): toasts, any problem
+// the whole app has to show, and today's date.
 
+import { today } from '../dates.js';
 import { describeProblem, explainError } from '../errors.js';
 import { logError } from '../log.js';
 
@@ -24,7 +25,21 @@ export const app = $state({
    * An unexpected error, shown as a banner over the page
    * @type {import('../errors.js').Explanation | null}
    */
-  problem: null
+  problem: null,
+  /** Today's date, which moves on at midnight so words such as "Today" stay right */
+  today: today()
+});
+
+function followTheDate() {
+  app.today = today();
+  const now = new Date();
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  setTimeout(followTheDate, nextMidnight.getTime() - now.getTime() + 1000);
+}
+followTheDate();
+// Timers are held back while the app is in the background, so check on return
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') app.today = today();
 });
 
 let nextToastId = 1;

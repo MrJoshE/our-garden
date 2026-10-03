@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { formatDate, isDate, isFuture, localDate, today } from './dates.js';
+import { dayName, daysSince, formatDate, isDate, isFuture, localDate, today } from './dates.js';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -57,5 +57,24 @@ describe('dates', () => {
     expect(formatDate('2024-03-14')).toBe('14 March 2024');
     expect(formatDate('2026-07-01')).toBe('1 July 2026');
     expect(formatDate('2026-12-31')).toBe('31 December 2026');
+  });
+
+  it('counts days on the calendar, across a clock change', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    // The clocks went forward on 29 March 2026, so these days are 23 hours apart
+    vi.setSystemTime(new Date(2026, 2, 30, 0, 30));
+    expect(daysSince('2026-03-30')).toBe(0);
+    expect(daysSince('2026-03-29')).toBe(1);
+    expect(daysSince('2026-03-28')).toBe(2);
+    expect(daysSince('2025-03-30')).toBe(365);
+  });
+
+  it('names journal days as Today, Yesterday, then the day, adding the year only for other years', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 3, 23, 50));
+    expect(dayName('2026-10-03')).toBe('Today');
+    expect(dayName('2026-10-02')).toBe('Yesterday');
+    expect(dayName('2026-09-26')).toBe('Saturday 26 September');
+    expect(dayName('2025-12-25')).toBe('Thursday 25 December 2025');
   });
 });
