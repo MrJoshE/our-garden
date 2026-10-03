@@ -1,10 +1,11 @@
 <script>
   import { untrack } from 'svelte';
+  import Backup from './Backup.svelte';
   import Field from './Field.svelte';
   import Icon from './Icon.svelte';
   import InlineProblem from './InlineProblem.svelte';
   import Sheet from './Sheet.svelte';
-  import { getCurrentPerson, updatePerson } from '../lib/db/index.js';
+  import { getCurrentPerson, getMeta, updatePerson } from '../lib/db/index.js';
   import { LIMITS } from '../lib/constants.js';
   import { formatMoment } from '../lib/dates.js';
   import { explainError } from '../lib/errors.js';
@@ -26,6 +27,8 @@
   let problem = $state(null);
   let saving = $state(false);
   let saved = $state(false);
+  /** @type {string | null} */
+  let lastBackupAt = $state(null);
   /** @type {{ usage: number, quota: number } | null} */
   let storage = $state(null);
   /** @type {import('../lib/log.js').ErrorRecord[]} */
@@ -46,8 +49,14 @@
     saved = false;
     showLog = false;
     try {
-      const [current, estimate, records] = await Promise.all([getCurrentPerson(), storageEstimate(), getErrorLog()]);
+      const [current, backedUpAt, estimate, records] = await Promise.all([
+        getCurrentPerson(),
+        getMeta('lastBackupAt'),
+        storageEstimate(),
+        getErrorLog()
+      ]);
       person = current;
+      lastBackupAt = backedUpAt ?? null;
       name = current?.name ?? '';
       storage = estimate;
       log = records.toReversed();
@@ -86,6 +95,8 @@
   <div class="stack stack-lg">
     {#if problem}<InlineProblem {problem} onRetry={person ? undefined : load} />{/if}
     {#if person}
+      <Backup {open} bind:lastBackupAt />
+
       <form novalidate onsubmit={saveName}>
         <Field
           label={strings.settings.name}
