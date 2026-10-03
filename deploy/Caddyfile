@@ -1,8 +1,7 @@
 :80 {
 	root * /srv/garden/current
 	file_server
-
-	header /assets/* Cache-Control "public, max-age=31536000, immutable"
-	@unhashed not path /assets/*
-	header @unhashed Cache-Control no-cache
+	# Not immutable for hashed assets: a 404 for one cached for a year comes
+	# back when a revert rebuilds the same file under the same hash.
+	header Cache-Control no-cache
 }

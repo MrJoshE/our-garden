@@ -33,7 +33,7 @@ npm run preview
 
 The Pi checks GitHub every 5 minutes, builds any new commit on `main`, and Caddy serves it over HTTP on port 80. For HTTPS, point a Cloudflare Tunnel at `http://localhost:80`.
 
-You need a Pi 3, 4 or 5 and Node 20.19 or newer. The `nodejs` package in Raspberry Pi OS Trixie is new enough; the one in Bookworm is too old.
+You need a Pi 3, 4 or 5 and Node 20.19 or newer. The `nodejs` package in Raspberry Pi OS Trixie is new enough; the one in Bookworm is too old. On Node 20, npm warns that Vitest wants 22; that doesn't matter, because the Pi doesn't run the tests.
 
 ```sh
 sudo apt update && sudo apt install -y git nodejs npm caddy
