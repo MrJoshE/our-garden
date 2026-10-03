@@ -1,5 +1,5 @@
 // The only shared in-memory state (brief section 7): toasts, any problem
-// the whole app has to show, and today's date.
+// the whole app has to show, the storage warning, and today's date.
 
 import { today } from '../dates.js';
 import { describeProblem, explainError } from '../errors.js';
@@ -27,8 +27,22 @@ export const app = $state({
    */
   problem: null,
   /** Today's date, which moves on at midnight so words such as "Today" stay right */
-  today: today()
+  today: today(),
+  /** The device's storage is more than 80% full (brief section 11) */
+  storageLow: false
 });
+
+const STORAGE_WARNING_SHARE = 0.8;
+
+/** Checks the space left, on start and after saving photos. */
+export async function checkStorage() {
+  try {
+    const { usage = 0, quota = 0 } = (await navigator.storage?.estimate?.()) ?? {};
+    app.storageLow = quota > 0 && usage / quota > STORAGE_WARNING_SHARE;
+  } catch (error) {
+    logError(error, { operation: 'checkStorage' });
+  }
+}
 
 function followTheDate() {
   app.today = today();

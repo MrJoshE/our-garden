@@ -2,12 +2,13 @@
   import EntryFields from './EntryFields.svelte';
   import Icon from './Icon.svelte';
   import InlineProblem from './InlineProblem.svelte';
+  import PhotoTray from './PhotoTray.svelte';
   import { createEntry, getDraft } from '../lib/db/index.js';
   import { ACTIVE_ISSUE_STATUSES } from '../lib/constants.js';
   import { isFuture } from '../lib/dates.js';
   import { focusFirstProblem, saveFailure } from '../lib/forms.js';
   import { logError } from '../lib/log.js';
-  import { app, showToast } from '../lib/state/app.svelte.js';
+  import { app, checkStorage, showToast } from '../lib/state/app.svelte.js';
   import { keepDraft } from '../lib/state/drafts.js';
   import { strings } from '../lib/strings.js';
 
@@ -15,7 +16,15 @@
   let { plantId, issues } = $props();
 
   const FIELDS = ['note', 'kind', 'occurredOn', 'product', 'issueId'];
-  const blank = () => ({ note: '', kind: 'observation', occurredOn: '', product: '', issueId: '' });
+  const blank = () => ({
+    note: '',
+    kind: 'observation',
+    occurredOn: '',
+    product: '',
+    issueId: '',
+    /** @type {import('./PhotoTray.svelte').TrayPhoto[]} */
+    photos: []
+  });
 
   const dateErrorId = $props.id();
   let values = $state(blank());
@@ -26,11 +35,15 @@
   let saving = $state(false);
   /** @type {ReturnType<typeof keepDraft> | null} */
   let draft = null;
+  /** @type {{ settled: () => Promise<void> } | undefined} */
+  let tray = $state();
 
   const openIssues = $derived(issues.filter((issue) => ACTIVE_ISSUE_STATUSES.includes(issue.status)));
 
-  // The same rule the database applies: a note, or a kind other than Observation
-  const canSave = $derived(values.note.trim() !== '' || values.kind !== 'observation');
+  // The same rule the database applies: a note, a photo, or a kind other than Observation
+  const canSave = $derived(
+    values.note.trim() !== '' || values.kind !== 'observation' || values.photos.some((item) => item.status !== 'failed')
+  );
   const started = $derived(JSON.stringify(values) !== JSON.stringify(blank()));
 
   // A draft left from before, perhaps when the phone discarded the page, comes back silently
@@ -41,7 +54,11 @@
       .then((saved) => {
         if (gone) return;
         if (saved) values = { ...blank(), ...saved };
-        draft = keepDraft(key, () => $state.snapshot(values));
+        // Photos join the draft once processed; one still processing can't be picked up again
+        draft = keepDraft(key, () => {
+          const snapshot = $state.snapshot(values);
+          return { ...snapshot, photos: snapshot.photos.filter((item) => item.status === 'ready') };
+        });
       })
       .catch((error) => logError(error, { operation: 'getDraft' }));
     return () => {
@@ -75,15 +92,21 @@
     if (errors.occurredOn) return focusFirstProblem(form);
     saving = true;
     try {
+      // Photos still being processed are waited for, not left behind
+      await tray?.settled();
+      const { photos: picked, ...fields } = $state.snapshot(values);
+      const photos = picked.filter((item) => item.status === 'ready').map((item) => item.photo);
       await createEntry(plantId, {
-        ...values,
+        ...fields,
+        photos,
         // An issue resolved since the form was filled in is no longer offered
-        issueId: openIssues.some((issue) => issue.id === values.issueId) ? values.issueId : null
+        issueId: openIssues.some((issue) => issue.id === fields.issueId) ? fields.issueId : null
       });
       reset();
       // Closes the phone's keyboard, so the new entry can be seen arriving
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
       showToast(strings.toasts.saved);
+      if (photos.length) checkStorage();
     } catch (error) {
       const failure = saveFailure(error, FIELDS);
       if (failure.field) errors = { [failure.field]: failure.message };
@@ -98,6 +121,7 @@
 <form class="card card-pad composer" aria-label={strings.entry.form} novalidate onsubmit={submit}>
   {#if problem}<InlineProblem {problem} />{/if}
   <EntryFields bind:values {errors} issues={openIssues} composer />
+  <PhotoTray bind:this={tray} bind:photos={values.photos} />
   <div class="composer-footer">
     <!-- Shows today until another day is chosen; an empty value keeps meaning today -->
     <label>
