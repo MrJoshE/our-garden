@@ -2,6 +2,7 @@
   // Small inline icons: 1.75 stroke in the current text colour. Add a path
   // here when a component needs a new icon.
   const paths = {
+    camera: ['M4 8.5h3l1.8-2.5h6.4L17 8.5h3V19H4z', 'M12 16.5a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5z'],
     check: ['m5 12.5 4.5 4.5L19 7'],
     chevronDown: ['m6 9 6 6 6-6'],
     chevronLeft: ['m15 18-6-6 6-6'],

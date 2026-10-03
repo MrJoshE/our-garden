@@ -1,12 +1,13 @@
 <script>
   import { onMount } from 'svelte';
   import { startDatabase } from './lib/db/index.js';
-  import { app, block, reportError } from './lib/state/app.svelte.js';
+  import { app, block, checkStorage, reportError } from './lib/state/app.svelte.js';
   import { paths, route } from './lib/state/router.svelte.js';
   import { explainError } from './lib/errors.js';
   import { strings } from './lib/strings.js';
   import ProblemBanner from './components/ProblemBanner.svelte';
   import ProblemScreen from './components/ProblemScreen.svelte';
+  import StorageBanner from './components/StorageBanner.svelte';
   import Toasts from './components/Toasts.svelte';
   import NotFound from './components/NotFound.svelte';
   import Start from './pages/Start.svelte';
@@ -29,6 +30,7 @@
     // message no longer applies.
     if (app.blocking?.kind === 'blocked') app.blocking = null;
     ready = true;
+    checkStorage();
   });
 </script>
 
@@ -37,6 +39,8 @@
 {:else if ready}
   {#if app.problem}
     <ProblemBanner problem={app.problem} onDismiss={() => (app.problem = null)} />
+  {:else if app.storageLow}
+    <StorageBanner />
   {/if}
   <svelte:boundary onerror={(error) => reportError(error, { operation: 'render' })}>
     {#if route.name === 'start'}

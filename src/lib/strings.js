@@ -194,6 +194,19 @@ export const strings = {
     delete: 'Delete entry'
   },
 
+  storage: {
+    title: 'Your device is nearly full',
+    message: 'Make a backup, then remove some old photos to free space, so new notes and photos can still be saved.'
+  },
+
+  photos: {
+    add: 'Add photos',
+    remove: 'Remove photo',
+    failed: 'This photo could not be read',
+    /** @param {number} limit */
+    tooMany: (limit) => `An entry holds up to ${limit} photos, so only the first ones were added.`
+  },
+
   installHint: {
     title: 'Add Garden Journal to your Home Screen first, so your journal is kept safe',
     steps: 'Tap the Share button, choose Add to Home Screen, then open Garden Journal from your Home Screen.'
