@@ -7,6 +7,13 @@ export const strings = {
   appName: 'Garden Journal',
   other: 'Other',
 
+  actions: {
+    reload: 'Reload',
+    retry: 'Try again',
+    back: 'Go back',
+    dismiss: 'Dismiss'
+  },
+
   gardenStatus: { active: 'Active', archived: 'Archived' },
   sun: { full: 'Full sun', part: 'Part shade', shade: 'Shade' },
   plantStatus: { growing: 'Growing', dormant: 'Dormant', removed: 'Removed', dead: 'Dead' },
@@ -68,6 +75,10 @@ export const strings = {
     closed: {
       title: 'Garden Journal was updated in another tab',
       message: 'Reload to carry on. Nothing you saved has been lost.'
+    },
+    blocked: {
+      title: 'Close your other Garden Journal tabs',
+      message: 'An update is waiting for Garden Journal to close in your other tabs or windows. Close them and it will carry on by itself.'
     },
     unknown: {
       title: 'Something went wrong',

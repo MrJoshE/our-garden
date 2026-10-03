@@ -11,17 +11,39 @@ import { strings } from './strings.js';
  * @typedef {'retry' | 'reload' | 'back' | 'backup'} Recovery
  */
 
-/** @typedef {'invalid' | 'notFound' | 'readOnly' | 'quota' | 'unavailable' | 'closed' | 'unknown'} Kind */
+/** What each kind of problem lets the user do about it */
+const RECOVERY = /** @type {const} */ ({
+  notFound: ['back'],
+  readOnly: [],
+  quota: ['backup', 'retry'],
+  unavailable: [],
+  closed: ['reload'],
+  blocked: [],
+  unknown: ['retry', 'reload']
+});
+
+/** @typedef {keyof typeof RECOVERY} ProblemKind */
+/** @typedef {ProblemKind | 'invalid'} Kind */
 
 /**
  * @typedef {object} Explanation
  * @property {Kind} kind
  * @property {string} title
  * @property {string} message
- * @property {Recovery[]} actions
+ * @property {readonly Recovery[]} actions
  * @property {string} [field] for a ValidationError, the field to mark and focus
  * @property {string} [fieldMessage] for a ValidationError, the message to show under it
  */
+
+/**
+ * The words and recovery actions for a kind of problem, including ones that
+ * are not errors, such as an upgrade waiting for other tabs to close.
+ * @param {ProblemKind} kind
+ * @returns {Explanation}
+ */
+export function describeProblem(kind) {
+  return { kind, ...strings.errors[kind], actions: RECOVERY[kind] };
+}
 
 /**
  * @param {unknown} error
@@ -36,27 +58,18 @@ export function explainError(error) {
         : field[error.reason];
     return { kind: 'invalid', ...strings.errors.invalid, actions: [], field: error.field, fieldMessage };
   }
-  if (error instanceof MissingRecordError) return explanation('notFound', ['back']);
-  if (error instanceof AutomaticEntryError) return explanation('readOnly', []);
+  if (error instanceof MissingRecordError) return describeProblem('notFound');
+  if (error instanceof AutomaticEntryError) return describeProblem('readOnly');
 
   // Browser and Dexie errors are recognised by name, and are often wrapped
   // (a transaction abort caused by a full disk, for example).
   const names = [error, ...causesOf(error)].map((e) => /** @type {any} */ (e)?.name);
   const has = (/** @type {string} */ name) => names.includes(name);
 
-  if (has('QuotaExceededError')) return explanation('quota', ['backup', 'retry']);
+  if (has('QuotaExceededError')) return describeProblem('quota');
   if (has('MissingAPIError') || has('SecurityError') || (has('OpenFailedError') && has('InvalidStateError'))) {
-    return explanation('unavailable', []);
+    return describeProblem('unavailable');
   }
-  if (has('DatabaseClosedError') || has('VersionChangeError')) return explanation('closed', ['reload']);
-  return explanation('unknown', ['retry', 'reload']);
-}
-
-/**
- * @param {Exclude<Kind, 'invalid'>} kind
- * @param {Recovery[]} actions
- * @returns {Explanation}
- */
-function explanation(kind, actions) {
-  return { kind, ...strings.errors[kind], actions };
+  if (has('DatabaseClosedError') || has('VersionChangeError')) return describeProblem('closed');
+  return describeProblem('unknown');
 }

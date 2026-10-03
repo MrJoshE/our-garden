@@ -18,8 +18,25 @@ export * from './areas.js';
 export * from './tasks.js';
 export * from './visits.js';
 
-/** Opens the database and frees space from old deleted photos. Call once on start. */
-export async function startDatabase() {
+/**
+ * Opens the database and frees space from old deleted photos. Call once on start.
+ * @param {{ onClosedByUpgrade?: () => void, onUpgradeBlocked?: () => void }} [handlers]
+ *   onClosedByUpgrade: another tab is upgrading the database, so this tab has
+ *   closed it. onUpgradeBlocked: this tab's upgrade is waiting for other tabs
+ *   to close; opening carries on by itself once they do.
+ */
+export async function startDatabase({ onClosedByUpgrade, onUpgradeBlocked } = {}) {
+  // Dexie runs the newest listener first; returning false skips its default,
+  // which only repeats this in a console warning.
+  db.on('versionchange', () => {
+    db.close();
+    onClosedByUpgrade?.();
+    return false;
+  });
+  db.on('blocked', () => {
+    onUpgradeBlocked?.();
+    return false;
+  });
   try {
     await db.open();
   } catch (error) {
