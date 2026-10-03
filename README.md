@@ -31,7 +31,7 @@ npm run preview
 
 ### On a Raspberry Pi
 
-The Pi checks GitHub every 5 minutes, builds any new commit on `main`, and Caddy serves it over HTTP on port 80. For HTTPS, point a Cloudflare Tunnel at `http://localhost:80`.
+The Pi checks GitHub every 5 minutes, builds any new commit on `main`, and Caddy serves it over HTTP on port 16000. For HTTPS, point a Cloudflare Tunnel at `http://localhost:16000`.
 
 You need a Pi 3, 4 or 5 running 64-bit Raspberry Pi OS Trixie, whose `nodejs` package (20.19) is new enough to build the app. Bookworm's is too old. npm warns that Vitest wants Node 22; that doesn't matter, because the Pi doesn't run the tests.
 
@@ -45,7 +45,7 @@ sudo cp garden-update.service garden-update.timer /etc/systemd/system/
 sudo cp Caddyfile /etc/caddy/Caddyfile
 sudo systemctl daemon-reload
 sudo systemctl enable --now garden-update.timer
-sudo systemctl reload caddy
+sudo systemctl restart caddy
 ```
 
 The first build starts straight away. Each build goes into `/srv/garden/releases/<commit>`, and `/srv/garden/current` only switches to it once the build has finished. A failed build leaves the site as it was and is tried again at the next check.
@@ -53,5 +53,5 @@ The first build starts straight away. Each build goes into `/srv/garden/releases
 - `journalctl -u garden-update` shows each deploy and any failures.
 - `sudo systemctl start garden-update` checks now instead of waiting.
 - To roll back, revert the commit on `main`. The Pi only ever serves `main`.
-- If the service, timer or Caddyfile in `deploy/` changes, copy it again, then run `sudo systemctl daemon-reload` and `sudo systemctl reload caddy`.
+- If the service, timer or Caddyfile in `deploy/` changes, copy it again, then run `sudo systemctl daemon-reload` and `sudo systemctl restart caddy`.
 - The Caddyfile replaces Debian's default one. If Caddy already serves other sites on the Pi, add this block to your own Caddyfile instead.
