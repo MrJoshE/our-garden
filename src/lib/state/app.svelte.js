@@ -32,7 +32,9 @@ export const app = $state({
   /** The device's storage is more than 80% full (brief section 11) */
   storageLow: false,
   /** Time for the once-only backup reminder (brief section 16) */
-  backupReminder: false
+  backupReminder: false,
+  /** A new version of the app is waiting for her to choose Update now (brief section 7) */
+  updateReady: false
 });
 
 export const STORAGE_WARNING_SHARE = 0.8;

@@ -323,6 +323,12 @@ export const strings = {
     logHint: 'Details of anything that went wrong, to help work out why. They hold no notes, names or photos.'
   },
 
+  update: {
+    title: 'A new version of Garden Journal is ready',
+    message: 'Update now to start using it. Anything you’re writing is kept.',
+    action: 'Update now'
+  },
+
   backupReminder: {
     title: 'Time for a backup',
     message: 'Your newest notes and photos are only on this device. A backup keeps them safe.',
