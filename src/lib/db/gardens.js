@@ -32,6 +32,25 @@ export async function getGarden(id) {
 }
 
 /**
+ * Remembers the garden being looked at, so the app reopens it next time.
+ * @param {string} id
+ */
+export async function setLastGarden(id) {
+  await db.meta.put({ key: 'lastGardenId', value: id });
+}
+
+/**
+ * The garden to open on start: the last one used if it still exists, then
+ * the first active garden, or null before first run.
+ * @returns {Promise<string | null>}
+ */
+export async function findStartGardenId() {
+  const lastId = (await db.meta.get('lastGardenId'))?.value;
+  if (lastId && current(await db.gardens.get(lastId))) return lastId;
+  return (await listGardens())[0]?.id ?? null;
+}
+
+/**
  * @param {Record<string, any>} input
  * @returns {Promise<string>} the new garden's id
  */
