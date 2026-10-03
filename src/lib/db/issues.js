@@ -112,3 +112,32 @@ export function setIssueStatus(id, status) {
     return true;
   });
 }
+
+/**
+ * Deletes an issue with the entries the app wrote for it and the photos
+ * added with it. Her own entries linked to it are hers, so they stay.
+ * @param {string} id
+ * @returns {Promise<string>} the deletedAt to pass to restoreIssue
+ */
+export function deleteIssue(id) {
+  return write('deleteIssue', ['issues', 'entries', 'photos'], async (w) => {
+    await w.remove('issues', id);
+    const automatic = await db.entries.where('issueId').equals(id).filter((e) => isCurrent(e) && e.auto).toArray();
+    for (const entry of automatic) await w.remove('entries', entry.id);
+    await w.removeWhere('photos', 'issueId', id);
+    return w.at;
+  });
+}
+
+/**
+ * Undoes deleteIssue.
+ * @param {string} id
+ * @param {string} deletedAt
+ */
+export async function restoreIssue(id, deletedAt) {
+  await write('restoreIssue', ['issues', 'entries', 'photos'], async (w) => {
+    await w.restoreWhere('issues', 'id', id, deletedAt);
+    await w.restoreWhere('entries', 'issueId', id, deletedAt);
+    await w.restoreWhere('photos', 'issueId', id, deletedAt);
+  });
+}

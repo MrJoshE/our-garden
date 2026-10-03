@@ -11,7 +11,7 @@ export { getMeta } from './meta.js';
 export { listGardens, getGarden, createGarden, updateGarden, deleteGarden, createFirstGarden } from './gardens.js';
 export { listPlants, getPlant, createPlant, updatePlant, deletePlant, restorePlant } from './plants.js';
 export { listEntries, createEntry, updateEntry, deleteEntry, restoreEntry, checkToday } from './entries.js';
-export { listIssues, createIssue, updateIssue, setIssueStatus } from './issues.js';
+export { listIssues, createIssue, updateIssue, setIssueStatus, deleteIssue, restoreIssue } from './issues.js';
 export { setCoverPhoto } from './photos.js';
 export { listPeople, getCurrentPerson, updatePerson } from './people.js';
 export * from './areas.js';
