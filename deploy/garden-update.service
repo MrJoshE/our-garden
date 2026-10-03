@@ -1,0 +1,12 @@
+[Unit]
+Description=Deploy the latest Garden Journal from GitHub
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=garden
+ExecStart=/srv/garden/repo/deploy/update.sh
+# Oneshot services have no start timeout by default, and the timer never
+# restarts a unit that is still running, so a hung fetch would stop polling.
+TimeoutStartSec=15min
