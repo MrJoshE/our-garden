@@ -978,6 +978,17 @@
   .timeline-item.is-new { animation: rise-in var(--dur-slow) var(--ease-out) both; }
   /* An entry being removed while the undo toast is showing */
   .timeline-item.is-leaving { animation: collapse-out var(--dur-base) var(--ease-in) both; }
+  /* An entry she wrote opens for editing when tapped anywhere on it: its
+     kind is a button stretched over the whole entry, and the highlight sits
+     under the entry, out to the card's edges */
+  .timeline-item:has(.entry-open) { position: relative; isolation: isolate; }
+  .timeline-item:has(.entry-open)::before { content: ''; position: absolute; inset: 0 calc(var(--space-4) * -1); z-index: -1; transition: background var(--dur-fast) var(--ease-out); }
+  .timeline-item:has(.entry-open:active)::before { background: var(--color-surface-sunken); }
+  @media (hover: hover) { .timeline-item:has(.entry-open:hover)::before { background: color-mix(in srgb, var(--color-surface-sunken) 50%, transparent); } }
+  .timeline-item:has(.entry-open:focus-visible)::before { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+  .entry-open { text-align: left; }
+  .entry-open:focus-visible { outline: none; }
+  .entry-open::after { content: ''; position: absolute; inset: 0 calc(var(--space-4) * -1); z-index: 1; }
 
   /* ---- Photos ---------------------------------------------------------- */
   .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-1); border-radius: var(--radius-md); overflow: hidden; }
