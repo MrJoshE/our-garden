@@ -308,7 +308,8 @@
     align-items: center;
     gap: var(--space-2);
     min-height: calc(var(--appbar-height) + var(--safe-top));
-    padding: var(--safe-top) calc(var(--page-gutter) + var(--safe-right)) 0 calc(var(--page-gutter) + var(--safe-left));
+    /* On wide screens the bar's contents line up with the centred page */
+    padding: var(--safe-top) max(calc(var(--page-gutter) + var(--safe-right)), calc((100% - var(--page-max)) / 2 + var(--page-gutter))) 0 max(calc(var(--page-gutter) + var(--safe-left)), calc((100% - var(--page-max)) / 2 + var(--page-gutter)));
     background: color-mix(in srgb, var(--color-bg) 0%, transparent);
     border-bottom: 1px solid transparent;
     transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
@@ -422,6 +423,9 @@
   .muted { color: var(--color-text-muted); }
   .lede { font-size: var(--text-lg); color: var(--color-text-soft); }
   .botanical { font-family: var(--font-serif); font-style: italic; color: var(--color-text-soft); }
+  /* Words that need attention inside ordinary text, such as "2 need attention"
+     under the garden's name */
+  .text-attention { color: var(--tone-attention-fg); font-weight: var(--weight-medium); }
   .prose { white-space: pre-wrap; max-width: var(--measure); }
 
   /* ---- Buttons --------------------------------------------------------- */
@@ -708,8 +712,8 @@
   .plant-card .meta { margin-top: var(--space-1); font-size: 0.68rem; font-weight: var(--weight-medium); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .plant-card.is-attention { border-color: var(--foxglove-300); }
   .plant-card[data-status='dormant'] .cover img { filter: saturate(0.55); }
-  .plant-card[data-status='removed'] .cover img,
-  .plant-card[data-status='dead'] .cover img { filter: grayscale(0.9) opacity(0.7); }
+  .plant-card[data-status='removed'] :is(.cover img, .cover-empty),
+  .plant-card[data-status='dead'] :is(.cover img, .cover-empty) { filter: grayscale(0.9) opacity(0.7); }
   .plant-card[data-status='removed'] .name,
   .plant-card[data-status='dead'] .name { color: var(--color-text-muted); }
 
@@ -829,7 +833,7 @@
   .switch input:checked::after { transform: translateX(20px); }
 
   /* Search box at the top of the plant list */
-  .search { position: relative; }
+  .search { position: relative; max-width: var(--measure); }
   .search .input { padding-left: calc(var(--space-8) + var(--space-1)); border-radius: var(--radius-pill); }
   .search svg { position: absolute; left: var(--space-3); top: 50%; translate: 0 -50%; width: 1.15rem; height: 1.15rem; color: var(--color-text-muted); pointer-events: none; }
 

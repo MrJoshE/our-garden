@@ -175,8 +175,13 @@ export function setView(changes) {
   if (next.filter === 'attention') params.set('filter', 'attention');
   if (next.search) params.set('q', next.search);
   const path = location.hash.split('?')[0] || '#/';
-  history.replaceState(history.state, '', params.size ? `${path}?${params}` : path);
   Object.assign(route, next);
+  try {
+    history.replaceState(history.state, '', params.size ? `${path}?${params}` : path);
+  } catch {
+    // Safari limits how often the address can change, such as while typing
+    // fast; the page already shows the change, and the next one catches up.
+  }
 }
 
 /**

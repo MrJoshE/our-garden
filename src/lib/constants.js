@@ -34,3 +34,16 @@ export const LIMITS = Object.freeze({ name: 120, note: 5000, photosPerEntry: 10 
 
 /** Days after a photo is deleted before its image data is removed */
 export const PHOTO_PURGE_DAYS = 30;
+
+export const COVER_TINTS = /** @type {const} */ (['rose', 'sage', 'rain', 'lavender', 'primrose']);
+
+/**
+ * The tint behind a plant's sprig when it has no photo. Taken from its id,
+ * so a plant keeps the same colour every time.
+ * @param {string} id
+ */
+export function tintFor(id) {
+  let hash = 0;
+  for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return COVER_TINTS[hash % COVER_TINTS.length];
+}
