@@ -942,6 +942,10 @@
   .composer .textarea { border-color: transparent; background: transparent; padding-inline: 0; font-family: var(--font-serif); font-size: var(--text-lg); box-shadow: none; }
   .composer .textarea:focus { box-shadow: none; }
   .composer-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-border); }
+  /* The entry's date sits in the footer, as wide as the date needs, with the
+     buttons kept on one line beside it down to a 360px phone */
+  .composer-footer .input { width: auto; padding-inline: var(--space-2); }
+  .composer-footer .cluster { flex-wrap: nowrap; }
   /* A section of a form that opens and closes smoothly. Toggle .is-open. */
   .reveal { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-base) var(--ease-out); }
   .reveal > * { overflow: hidden; min-height: 0; }

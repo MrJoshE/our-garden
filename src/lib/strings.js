@@ -156,6 +156,20 @@ export const strings = {
             : `Last checked ${date}`
   },
 
+  entry: {
+    form: 'New entry',
+    note: 'Note',
+    notePlaceholder: 'What did you notice?',
+    kind: 'Kind',
+    date: 'Date',
+    product: 'Product',
+    productHint: 'Such as the feed or spray you used.',
+    issue: 'Problem',
+    noIssue: 'Not about a problem',
+    save: 'Save',
+    clear: 'Clear'
+  },
+
   timeline: {
     title: 'Timeline',
     empty: {
