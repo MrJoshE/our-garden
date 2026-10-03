@@ -1023,6 +1023,12 @@
   .lightbox .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: calc(var(--space-3) + var(--safe-top)) var(--space-4) var(--space-3); }
   .lightbox .caption { padding: var(--space-3) var(--space-4) calc(var(--space-4) + var(--safe-bottom)); font-size: var(--text-sm); color: rgb(255 255 255 / 0.8); text-align: center; }
   .lightbox .btn-quiet { color: #fff; }
+  /* Previous and next sit either side of the caption, for those not swiping */
+  .lightbox .caption { display: flex; align-items: center; gap: var(--space-3); }
+  .lightbox-cover { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--tap); padding-inline: var(--space-3); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+  .lightbox-cover svg { width: 1.1em; height: 1.1em; }
+  /* Photos in an entry open the lightbox, above the entry's own tap target */
+  .photo-grid > button { z-index: 2; }
 
   /* ---- Sheets and dialogs ---------------------------------------------
      Use the native <dialog> element with class "sheet". It is a bottom sheet
