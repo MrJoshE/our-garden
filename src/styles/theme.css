@@ -22,6 +22,8 @@
        otherwise.
      - Styles written inside Svelte components are unlayered, so they always
        win over anything in this file without needing !important.
+     - The theme is flat: no shadows. Surfaces are separated by borders,
+       fills and spacing.
    ========================================================================== */
 
 @layer reset, tokens, base, layout, components, motion, utilities;
@@ -39,6 +41,7 @@
     --dew-200: #e5ebe1;
     --dew-300: #dfe5da;
     --dew-400: #c9d2c4;
+    --ivy-300: #838f84;
     --ivy-500: #5d6b62;
     --ivy-700: #44524a;
     --ivy-900: #1f2b25;
@@ -72,7 +75,9 @@
     --color-text-muted: var(--ivy-500);
     --color-text-on-accent: #ffffff;
     --color-border: var(--dew-300);
-    --color-border-strong: var(--dew-400);
+    /* Edges of controls (inputs, chips, buttons, checkboxes). At least 3:1
+       against the page and surfaces, so they stay visible outdoors. */
+    --color-border-strong: var(--ivy-300);
     --color-accent: var(--sage-700);
     --color-accent-hover: var(--sage-800);
     --color-accent-active: var(--sage-900);
@@ -134,14 +139,10 @@
     --radius-xl: 24px;
     --radius-pill: 999px;
 
-    /* Elevation: soft green-grey shadows that sit low and wide */
-    --shadow-1: 0 1px 2px rgb(31 43 37 / 0.04);
-    --shadow-2: 0 1px 2px rgb(31 43 37 / 0.04), 0 10px 24px -14px rgb(31 43 37 / 0.18);
-    --shadow-3: 0 2px 4px rgb(31 43 37 / 0.1), 0 14px 28px -10px rgb(31 43 37 / 0.3);
-    --shadow-4: 0 20px 48px rgb(31 43 37 / 0.22), 0 4px 12px rgb(31 43 37 / 0.08);
 
     /* Sizes */
     --tap: 44px;
+    --tap-sm: 36px;
     --tap-lg: 52px;
     --page-max: 1080px;
     --measure: 62ch;
@@ -332,7 +333,7 @@
     transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
   }
   .appbar.is-scrolled .appbar-title { opacity: 1; transform: none; }
-  .appbar-actions { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
+  .appbar-actions { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
 
   .page {
     flex: 1;
@@ -434,22 +435,19 @@
     white-space: nowrap;
     user-select: none;
     -webkit-user-select: none;
-    box-shadow: var(--shadow-1);
     transition:
       background var(--dur-fast) var(--ease-out),
       border-color var(--dur-fast) var(--ease-out),
-      box-shadow var(--dur-fast) var(--ease-out),
       transform var(--dur-fast) var(--ease-out),
       opacity var(--dur-fast) var(--ease-out);
   }
-  .btn:active { transform: scale(0.97); box-shadow: none; transition-duration: var(--dur-instant); }
+  .btn:active { transform: scale(0.97); transition-duration: var(--dur-instant); }
   .btn svg { width: 1.2em; height: 1.2em; flex: none; }
 
   .btn-primary {
     background: var(--color-accent);
     border-color: var(--color-accent);
     color: var(--color-text-on-accent);
-    box-shadow: var(--shadow-2);
   }
   .btn-primary:active { background: var(--color-accent-active); }
 
@@ -462,7 +460,6 @@
   .btn-quiet {
     background: transparent;
     border-color: transparent;
-    box-shadow: none;
     color: var(--color-text-soft);
     padding-inline: var(--space-3);
   }
@@ -471,7 +468,9 @@
   .btn-danger { color: var(--tone-danger-fg); }
   .btn-danger.btn-primary { background: var(--tone-danger-fg); border-color: var(--tone-danger-fg); color: #fff; }
 
-  .btn-sm { min-height: 36px; padding-inline: var(--space-3); font-size: var(--text-sm); }
+  .btn-sm { min-height: var(--tap-sm); padding-inline: var(--space-3); font-size: var(--text-sm); }
+  /* Small buttons look smaller but keep a full-size touch area */
+  .btn-sm::before, .toast .btn::before { content: ''; position: absolute; inset: calc((var(--tap) - var(--tap-sm)) / -2) 0; }
   .btn-lg { min-height: var(--tap-lg); padding-inline: var(--space-6); font-size: var(--text-lg); }
   .btn-block { display: flex; width: 100%; }
 
@@ -486,7 +485,6 @@
   .btn:disabled, .btn[aria-disabled='true'] {
     opacity: 0.5;
     cursor: not-allowed;
-    box-shadow: none;
     transform: none;
   }
 
@@ -507,10 +505,10 @@
   .btn-secondary[aria-busy='true']::after { border-color: #fff; border-right-color: transparent; }
 
   @media (hover: hover) {
-    .btn:hover:not(:disabled) { border-color: var(--ivy-500); box-shadow: var(--shadow-2); }
+    .btn:hover:not(:disabled) { border-color: var(--ivy-500); }
     .btn-primary:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
     .btn-secondary:hover:not(:disabled) { background: var(--sage-700); border-color: var(--sage-700); }
-    .btn-quiet:hover:not(:disabled) { background: var(--color-surface-sunken); border-color: transparent; box-shadow: none; }
+    .btn-quiet:hover:not(:disabled) { background: var(--color-surface-sunken); border-color: transparent; }
   }
 
   /* Floating main action on phones. On wide screens put a normal button in
@@ -522,14 +520,13 @@
     z-index: var(--z-fab);
     min-height: var(--tap-lg);
     padding-inline: var(--space-6);
-    box-shadow: var(--shadow-3);
   }
   @media (min-width: 900px) { .fab { display: none; } }
 
   /* "Checked today" button. Add .is-done after a successful save. */
   .check-button { --check-color: var(--color-secondary); }
   .check-button .tick { width: 1.2em; height: 1.2em; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 0; }
-  .check-button.is-done { background: var(--color-secondary-soft); border-color: var(--sage-300); color: var(--sage-700); box-shadow: none; animation: pop var(--dur-slow) var(--ease-spring); }
+  .check-button.is-done { background: var(--color-secondary-soft); border-color: var(--sage-300); color: var(--sage-700); animation: pop var(--dur-slow) var(--ease-spring); }
   .check-button.is-done .tick { animation: draw var(--dur-slow) var(--ease-out) both; }
 
   /* ---- Segmented control and chips ------------------------------------ */
@@ -639,7 +636,7 @@
   .badge.is-new { animation: pulse-ring 1.2s var(--ease-out) 1; }
 
   .severity { display: inline-flex; gap: 3px; vertical-align: middle; }
-  .severity > i { width: 6px; height: 12px; border-radius: 2px; background: var(--color-border-strong); }
+  .severity > i { width: 6px; height: 12px; border-radius: 2px; background: var(--dew-400); }
   .severity[data-level='low'] > i:nth-child(-n + 1),
   .severity[data-level='medium'] > i:nth-child(-n + 2),
   .severity[data-level='high'] > i:nth-child(-n + 3) { background: var(--foxglove-500); }
@@ -649,7 +646,6 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-2);
   }
   .card-pad { padding: var(--space-4); }
   @media (min-width: 600px) { .card-pad { padding: var(--space-5); } }
@@ -658,11 +654,11 @@
     display: block;
     color: inherit;
     text-decoration: none;
-    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+    transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
   }
   .card-interactive:active { transform: scale(0.985); transition-duration: var(--dur-instant); }
   @media (hover: hover) {
-    .card-interactive:hover { transform: translateY(-2px); box-shadow: var(--shadow-3); border-color: var(--color-border-strong); }
+    .card-interactive:hover { border-color: var(--color-border-strong); }
   }
 
   /* ---- Plant grid and plant card -------------------------------------- */
@@ -714,7 +710,6 @@
     border-radius: var(--radius-xl);
     overflow: hidden;
     background: var(--color-surface-sunken);
-    box-shadow: var(--shadow-2);
   }
   .hero-cover img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -759,7 +754,7 @@
     background-position: right var(--space-3) center;
     background-size: 1rem;
   }
-  .input::placeholder, .textarea::placeholder { color: color-mix(in srgb, var(--color-text-muted) 75%, var(--color-surface-input)); opacity: 1; }
+  .input::placeholder, .textarea::placeholder { color: var(--color-text-muted); opacity: 1; }
   .input:focus, .textarea:focus, .select:focus {
     outline: none;
     border-color: var(--color-accent);
@@ -819,7 +814,6 @@
     height: 22px;
     border-radius: 50%;
     background: #fff;
-    box-shadow: var(--shadow-2);
     transition: transform var(--dur-base) var(--ease-spring);
   }
   .switch input:checked { background: var(--color-secondary); }
@@ -887,6 +881,8 @@
     color: #fff;
   }
   .photo-tray .remove svg { width: 14px; height: 14px; }
+  /* A full-size touch area that grows into the photo, which clips anything outside it */
+  .photo-tray .remove::before { content: ''; position: absolute; top: -2px; right: -2px; width: var(--tap); height: var(--tap); }
 
   /* The form for adding a journal entry */
   .composer { display: flex; flex-direction: column; gap: var(--space-4); }
@@ -909,7 +905,7 @@
   .issue-card[data-tone='resolved'] .title { color: var(--color-text-muted); text-decoration: line-through; text-decoration-color: var(--sage-300); }
 
   /* ---- Timeline -------------------------------------------------------- */
-  .timeline { display: flex; flex-direction: column; padding-inline: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-2); }
+  .timeline { display: flex; flex-direction: column; padding-inline: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
   .timeline > * + * { border-top: 1px solid var(--color-border); }
   .timeline-date { padding-top: var(--space-4); font-family: var(--font-serif); font-size: var(--text-lg); }
   /* The first entry of a day sits directly under its date */
@@ -972,7 +968,6 @@
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     background: var(--color-surface);
     color: var(--color-text);
-    box-shadow: var(--shadow-4);
     overflow: hidden;
   }
   dialog.sheet[open] { display: flex; flex-direction: column; animation: sheet-up var(--dur-slow) var(--ease-out); }
@@ -1010,10 +1005,9 @@
     min-width: 220px;
     max-width: min(320px, calc(100vw - var(--space-8)));
     padding: var(--space-1);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-lg);
     background: var(--color-surface);
-    box-shadow: var(--shadow-3);
     transform-origin: top right;
     animation: menu-in var(--dur-fast) var(--ease-out);
   }
@@ -1071,12 +1065,11 @@
     color: var(--dew-50);
     font-size: var(--text-sm);
     font-weight: var(--weight-medium);
-    box-shadow: var(--shadow-3);
     animation: toast-in var(--dur-slow) var(--ease-spring) both;
   }
   .toast.is-leaving { animation: toast-out var(--dur-base) var(--ease-in) forwards; }
   .toast > span { flex: 1; padding-block: var(--space-1); }
-  .toast .btn { min-height: 36px; background: transparent; border-color: rgb(255 255 255 / 0.3); color: var(--sage-300); box-shadow: none; }
+  .toast .btn { min-height: var(--tap-sm); background: transparent; border-color: rgb(255 255 255 / 0.3); color: var(--sage-300); }
   .toast[data-tone='danger'] { background: var(--tone-danger-fg); color: #fff; }
 
   /* ---- Banners (install hint, storage warning, update ready) ---------- */
@@ -1241,7 +1234,7 @@
   body { background: #fff; }
   .appbar, .fab, .toast-region, .banner, .btn, .composer, .segmented, .search, .app-footer, dialog { display: none !important; }
   .page { max-width: none; padding: 0; }
-  .card { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+  .card { border-color: #ccc; break-inside: avoid; }
   .timeline-item, .issue-card, .plant-card { break-inside: avoid; }
   .plant-card { content-visibility: visible; }
   a { text-decoration: none; }

@@ -16,7 +16,7 @@ Every feature or piece of implementation follows the same steps, in this order.
 4. Run `/triage-candidate` and `/josh-analysis` again on what was implemented.
 5. Do the edge case review described below and fix what it finds in the same pull request.
 6. Write the results of steps 4 and 5 in the pull request, including anything you decided not to fix and why.
-7. Stop for my review. When I approve, merge the pull request and close the issue.
+7. Merge the pull request and close the issue. There is no need to wait for my approval once steps 4 to 6 are done.
 
 Until `/josh-analysis` exists, use `/implementation-rigor` in its place.
 
@@ -49,6 +49,12 @@ List what you found in the pull request, then fix it.
 
 - Make the app feel as native as possible on iOS and Android while keeping the look of `theme.css`. Prefer the platform's own behaviour and controls (native `dialog`, date and file pickers, the share sheet, back gesture and button, safe areas, momentum scrolling, instant touch feedback) over web-page conventions or custom widgets.
 - Where feeling native and following the theme pull in different directions, keep the theme where you can and raise the conflict rather than quietly picking one.
+
+## UI work
+
+- When creating or changing UI elements, use `/ui-design`, `/anti-ui-slop`, `/ui-ux-pro-max`, `/ui-radar` and `/design-taste-frontend`: the first two to plan and build (they share playbooks, so load one per task) and for the finish check, `/ui-ux-pro-max` for the UX and accessibility checks, `/ui-radar` when one concrete question needs real examples, and `/design-taste-frontend` for a critique.
+- The brief, this file and `theme.css` outrank those skills. Take their judgement, not their defaults: no React, Tailwind, icon libraries, new fonts or decorative motion.
+- Keep the UI relatively flat, with no shadows. Separate surfaces with borders, fills and spacing.
 
 ## Errors
 
