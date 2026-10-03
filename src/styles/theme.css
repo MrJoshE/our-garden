@@ -412,7 +412,7 @@
 
   /* Plant page: one column on phones, details beside the timeline on
      wide screens */
-  .split { display: grid; gap: var(--space-6); }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
   @container page (min-width: 860px) {
     .split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; gap: var(--space-8); }
     /* The details stay in view beside a long timeline. When they are taller
@@ -574,7 +574,8 @@
   /* "Checked today" button. Add .is-done once the plant has been checked
      today, and .is-new as well right after a tap, so only a check made now
      pops and draws its tick, not one from earlier in the day. */
-  .check-button { --check-color: var(--color-secondary); }
+  /* Its words may wrap when text is enlarged, rather than push the page wider */
+  .check-button { --check-color: var(--color-secondary); white-space: normal; line-height: var(--leading-tight); padding-block: var(--space-2); }
   .check-button .tick { width: 1.2em; height: 1.2em; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 0; }
   .check-button.is-done { background: var(--color-secondary-soft); border-color: var(--sage-300); color: var(--sage-700); }
   .check-button.is-done.is-new { animation: pop var(--dur-slow) var(--ease-spring); }
@@ -943,11 +944,13 @@
   .composer { display: flex; flex-direction: column; gap: var(--space-4); }
   .composer .textarea { border-color: transparent; background: transparent; padding-inline: 0; font-family: var(--font-serif); font-size: var(--text-lg); box-shadow: none; }
   .composer .textarea:focus { box-shadow: none; }
-  .composer-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-border); }
+  .composer-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-border); }
   /* The entry's date sits in the footer, as wide as the date needs, with the
-     buttons kept on one line beside it down to a 360px phone */
-  .composer-footer .input { width: auto; padding-inline: var(--space-2); }
-  .composer-footer .cluster { flex-wrap: nowrap; }
+     buttons kept on one line beside it down to a 360px phone. With enlarged
+     text the buttons wrap below the date together. */
+  .composer-footer > label { flex: 1 1 8rem; min-width: 0; max-width: 11rem; }
+  .composer-footer .input { padding-inline: var(--space-2); }
+  .composer-footer .cluster { flex-wrap: nowrap; margin-left: auto; }
   /* A section of a form that opens and closes smoothly. Toggle .is-open. */
   .reveal { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-base) var(--ease-out); }
   .reveal > * { overflow: hidden; min-height: 0; }
