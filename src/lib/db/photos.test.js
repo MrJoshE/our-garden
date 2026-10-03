@@ -1,7 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from './schema.js';
 import { purgeDeletedPhotoBlobs } from './photos.js';
-import { createEntry, createPlant, deleteEntry, getPlant, setCoverPhoto, startDatabase } from './index.js';
+import {
+  createEntry,
+  createPlant,
+  deleteEntry,
+  getPlant,
+  listPlants,
+  restoreEntry,
+  setCoverPhoto,
+  startDatabase
+} from './index.js';
 import { changesFor, makePhoto, resetDatabase, startGarden } from '../../test/helpers.js';
 
 beforeEach(resetDatabase);
@@ -19,6 +28,49 @@ describe('cover photo', () => {
 
     const rose = await createPlant(gardenId, { commonName: 'Rose' });
     await expect(setCoverPhoto(rose, photo.id)).rejects.toMatchObject({ field: 'photoId' });
+  });
+});
+
+describe('when the cover photo is deleted', () => {
+  /** @param {string} entryId */
+  const photoOf = async (entryId) => (await db.photos.where('entryId').equals(entryId).first()).id;
+
+  it('shows the most recently taken remaining photo instead', async () => {
+    const { gardenId, plantId } = await startGarden();
+    const coverEntry = await createEntry(plantId, { photos: [makePhoto({ takenAt: '2026-06-01T10:00:00Z' })] });
+    const newest = await createEntry(plantId, { photos: [makePhoto({ takenAt: '2026-08-01T10:00:00Z' })] });
+    await createEntry(plantId, { photos: [makePhoto({ takenAt: '2026-07-01T10:00:00Z' })] });
+    await deleteEntry(coverEntry);
+    const expected = await photoOf(newest);
+    expect((await getPlant(plantId))?.cover?.id).toBe(expected);
+    expect((await listPlants(gardenId)).find((p) => p.id === plantId)?.cover?.id).toBe(expected);
+  });
+
+  it('uses when a photo was added if when it was taken is unknown', async () => {
+    const { plantId } = await startGarden();
+    const coverEntry = await createEntry(plantId, { photos: [makePhoto()] });
+    await createEntry(plantId, { photos: [makePhoto({ takenAt: null })] });
+    const latest = await createEntry(plantId, { photos: [makePhoto({ takenAt: null })] });
+    await deleteEntry(coverEntry);
+    expect((await getPlant(plantId))?.cover?.id).toBe(await photoOf(latest));
+  });
+
+  it('keeps the chosen cover, so undoing the delete brings it back', async () => {
+    const { plantId } = await startGarden();
+    const coverEntry = await createEntry(plantId, { photos: [makePhoto()] });
+    const chosen = await photoOf(coverEntry);
+    const deletedAt = await deleteEntry(coverEntry);
+    await createEntry(plantId, { photos: [makePhoto()] });
+    expect((await getPlant(plantId))?.cover?.id).not.toBe(chosen);
+    await restoreEntry(coverEntry, deletedAt);
+    expect((await getPlant(plantId))?.cover?.id).toBe(chosen);
+  });
+
+  it('shows no cover once no photos remain', async () => {
+    const { plantId } = await startGarden();
+    const only = await createEntry(plantId, { photos: [makePhoto()] });
+    await deleteEntry(only);
+    expect((await getPlant(plantId))?.cover).toBeNull();
   });
 });
 
