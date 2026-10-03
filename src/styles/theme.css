@@ -996,6 +996,9 @@
     background: var(--color-surface);
   }
   .sheet-footer .btn { flex: 1; }
+  /* A form wrapping a sheet's body and footer, so the body still scrolls
+     and the footer stays put */
+  .sheet-form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
   @media (min-width: 600px) {
     dialog.sheet { width: min(520px, calc(100vw - var(--space-8))); max-height: min(720px, calc(100dvh - var(--space-12))); margin: auto; border-radius: var(--radius-xl); }

@@ -7,7 +7,7 @@ import { logError } from '../log.js';
 
 export { ValidationError } from './fields.js';
 export { MissingRecordError, AutomaticEntryError } from './write.js';
-export { getMeta } from './meta.js';
+export { getMeta, setMeta } from './meta.js';
 export {
   listGardens,
   getGarden,

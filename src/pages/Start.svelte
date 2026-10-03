@@ -4,6 +4,8 @@
   import { navigate, paths } from '../lib/state/router.svelte.js';
   import { reportError } from '../lib/state/app.svelte.js';
   import { strings } from '../lib/strings.js';
+  import Icon from '../components/Icon.svelte';
+  import WelcomeSheet from '../components/WelcomeSheet.svelte';
 
   let firstRun = $state(false);
 
@@ -19,8 +21,12 @@
 </script>
 
 {#if firstRun}
-  <!-- The welcome sheet arrives in step 2.3. -->
   <main class="page">
-    <h1 tabindex="-1">{strings.appName}</h1>
+    <!-- Seen above the bottom sheet on phones; behind a centred dialog it only gets in the way -->
+    <div class="empty only-phone">
+      <Icon name="sprig" />
+      <h1 tabindex="-1">{strings.appName}</h1>
+    </div>
   </main>
+  <WelcomeSheet />
 {/if}

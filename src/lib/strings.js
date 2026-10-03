@@ -11,7 +11,30 @@ export const strings = {
     reload: 'Reload',
     retry: 'Try again',
     back: 'Go back',
-    dismiss: 'Dismiss'
+    dismiss: 'Dismiss',
+    close: 'Close'
+  },
+
+  form: {
+    optional: 'optional',
+    /**
+     * @param {number} length
+     * @param {number} limit
+     */
+    count: (length, limit) => `${length.toLocaleString('en-GB')} of ${limit.toLocaleString('en-GB')}`
+  },
+
+  welcome: {
+    title: 'Welcome to Garden Journal',
+    intro: 'Start with your name and the name of your garden. You can add more gardens later.',
+    personName: 'Your name',
+    gardenName: 'Garden name',
+    submit: 'Start the journal'
+  },
+
+  installHint: {
+    title: 'Add Garden Journal to your Home Screen first, so your journal is kept safe',
+    steps: 'Tap the Share button, choose Add to Home Screen, then open Garden Journal from your Home Screen.'
   },
 
   navigation: {

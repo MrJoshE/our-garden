@@ -10,3 +10,11 @@ import { db } from './schema.js';
 export async function getMeta(key) {
   return (await db.meta.get(key))?.value;
 }
+
+/**
+ * @param {string} key
+ * @param {any} value
+ */
+export async function setMeta(key, value) {
+  await db.meta.put({ key, value });
+}
