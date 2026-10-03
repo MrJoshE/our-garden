@@ -33,7 +33,7 @@ npm run preview
 
 The Pi checks GitHub every 5 minutes, builds any new commit on `main`, and Caddy serves it over HTTP on port 80. For HTTPS, point a Cloudflare Tunnel at `http://localhost:80`.
 
-You need a Pi 3, 4 or 5 and Node 20.19 or newer. The `nodejs` package in Raspberry Pi OS Trixie is new enough; the one in Bookworm is too old. On Node 20, npm warns that Vitest wants 22; that doesn't matter, because the Pi doesn't run the tests.
+You need a Pi 3, 4 or 5 running 64-bit Raspberry Pi OS Trixie, whose `nodejs` package (20.19) is new enough to build the app. Bookworm's is too old. npm warns that Vitest wants Node 22; that doesn't matter, because the Pi doesn't run the tests.
 
 ```sh
 sudo apt update && sudo apt install -y git nodejs npm caddy
@@ -52,5 +52,6 @@ The first build starts straight away. Each build goes into `/srv/garden/releases
 
 - `journalctl -u garden-update` shows each deploy and any failures.
 - `sudo systemctl start garden-update` checks now instead of waiting.
+- To roll back, revert the commit on `main`. The Pi only ever serves `main`.
 - If the service, timer or Caddyfile in `deploy/` changes, copy it again, then run `sudo systemctl daemon-reload` and `sudo systemctl reload caddy`.
 - The Caddyfile replaces Debian's default one. If Caddy already serves other sites on the Pi, add this block to your own Caddyfile instead.
