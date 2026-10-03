@@ -7,6 +7,7 @@
   import { strings } from './lib/strings.js';
   import ProblemBanner from './components/ProblemBanner.svelte';
   import ProblemScreen from './components/ProblemScreen.svelte';
+  import SettingsSheet from './components/SettingsSheet.svelte';
   import StorageBanner from './components/StorageBanner.svelte';
   import Toasts from './components/Toasts.svelte';
   import NotFound from './components/NotFound.svelte';
@@ -57,6 +58,8 @@
       <ProblemScreen problem={explainError(error)} onRetry={reset} />
     {/snippet}
   </svelte:boundary>
+  <!-- Here, not on a page, because the storage banner opens it from anywhere -->
+  <SettingsSheet open={route.sheet === 'settings'} />
 {/if}
 
 <Toasts />

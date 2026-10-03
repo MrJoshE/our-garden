@@ -50,6 +50,7 @@
   <div class="menu-divider"></div>
   <button class="menu-item" type="button" onclick={() => openSheet('add-garden')}>{strings.gardenMenu.add}</button>
   <button class="menu-item" type="button" onclick={() => openSheet('edit-garden')}>{strings.gardenMenu.edit}</button>
+  <button class="menu-item" type="button" onclick={() => openSheet('settings')}>{strings.settings.title}</button>
   {#if import.meta.env.DEV}
     <button class="menu-item" type="button" onclick={loadSample}>Load sample garden</button>
   {/if}

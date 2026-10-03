@@ -3,6 +3,21 @@
 /** Sorts names the way a person would: ignoring case and accents, with 2 before 10 */
 export const compareText = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true }).compare;
 
+const sizes = ['kilobyte', 'megabyte', 'gigabyte', 'terabyte'].map(
+  (unit) => new Intl.NumberFormat('en-GB', { style: 'unit', unit, unitDisplay: 'short', maximumFractionDigits: 1 })
+);
+
+/** @param {number} bytes such as 38 MB */
+function size(bytes) {
+  let value = bytes / 1000;
+  let unit = 0;
+  while (value >= 1000 && unit < sizes.length - 1) {
+    value /= 1000;
+    unit++;
+  }
+  return sizes[unit].format(value);
+}
+
 export const strings = {
   appName: 'Garden Journal',
   other: 'Other',
@@ -221,6 +236,26 @@ export const strings = {
     save: 'Save',
     cancel: 'Cancel',
     delete: 'Delete entry'
+  },
+
+  settings: {
+    title: 'Backup and settings',
+    name: 'Your name',
+    saveName: 'Save name',
+    nameSaved: 'Name saved',
+    storage: 'Storage used',
+    /**
+     * @param {number} usage bytes
+     * @param {number} quota bytes
+     */
+    storageUsed: (usage, quota) => `${size(usage)} of ${size(quota)}`,
+    storageUnknown: 'Not shown by this browser',
+    version: 'App version',
+    /** @param {number} count */
+    log: (count) => `Problem log (${count})`,
+    logEmpty: 'No problems logged',
+    causedBy: 'Caused by',
+    logHint: 'Details of anything that went wrong, to help work out why. They hold no notes, names or photos.'
   },
 
   storage: {

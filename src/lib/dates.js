@@ -100,3 +100,13 @@ export function dayName(ymd, now = today()) {
   const rest = parts(ymd).year === parts(now).year ? dayAndMonth : longDate;
   return `${weekday.format(date)} ${rest.format(date)}`;
 }
+
+const moment = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+/**
+ * A moment in local time, such as "3 Oct, 14:05".
+ * @param {string} iso a timestamp
+ */
+export function formatMoment(iso) {
+  return moment.format(new Date(iso));
+}
