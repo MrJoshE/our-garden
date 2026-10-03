@@ -1,6 +1,17 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from './schema.js';
-import { createIssue, listEntries, listIssues, setIssueStatus, updateIssue } from './index.js';
+import { MissingRecordError } from './write.js';
+import {
+  createEntry,
+  createIssue,
+  deleteIssue,
+  getPlant,
+  listEntries,
+  listIssues,
+  restoreIssue,
+  setIssueStatus,
+  updateIssue
+} from './index.js';
 import { today } from '../dates.js';
 import { strings } from '../strings.js';
 import { makePhoto, resetDatabase, startGarden } from '../../test/helpers.js';
@@ -103,6 +114,47 @@ describe('changing an issue’s status', () => {
     const id = await createIssue(plantId, { title: 'Aphids' });
     await updateIssue(id, { title: 'Greenfly', severity: 'high', status: 'resolved' });
     expect(await db.issues.get(id)).toMatchObject({ title: 'Greenfly', severity: 'high', status: 'open' });
+  });
+});
+
+describe('deleting an issue', () => {
+  it('deletes the issue with the entries the app wrote for it and its photos, keeping her own linked entries', async () => {
+    const { plantId } = await startGarden();
+    const id = await createIssue(plantId, { title: 'Aphids', photos: [makePhoto()] });
+    await setIssueStatus(id, 'watching');
+    const treated = await createEntry(plantId, { kind: 'treated', product: 'Soapy water', issueId: id });
+
+    await deleteIssue(id);
+
+    expect(await listIssues(plantId)).toEqual([]);
+    expect((await getPlant(plantId))?.needsAttention).toBe(false);
+    const { entries } = await listEntries(plantId);
+    expect(entries.map((e) => e.id)).toEqual([treated]);
+    expect(await db.photos.where('issueId').equals(id).filter((p) => p.deletedAt == null).count()).toBe(0);
+  });
+
+  it('undo brings back exactly what the delete removed', async () => {
+    const { plantId } = await startGarden();
+    const id = await createIssue(plantId, { title: 'Aphids', photos: [makePhoto()] });
+    await setIssueStatus(id, 'watching');
+    const timeline = async () =>
+      (await listEntries(plantId)).entries.map((e) => [e.id, e.photos.map((/** @type {any} */ p) => p.id)]);
+    const before = await timeline();
+
+    const deletedAt = await deleteIssue(id);
+    await restoreIssue(id, deletedAt);
+
+    expect((await listIssues(plantId)).map((i) => i.id)).toEqual([id]);
+    expect((await getPlant(plantId))?.needsAttention).toBe(true);
+    expect(await timeline()).toEqual(before);
+  });
+
+  it('cannot delete an issue that is missing or already deleted', async () => {
+    const { plantId } = await startGarden();
+    const id = await createIssue(plantId, { title: 'Aphids' });
+    await deleteIssue(id);
+    await expect(deleteIssue(id)).rejects.toBeInstanceOf(MissingRecordError);
+    await expect(deleteIssue('no-such-issue')).rejects.toBeInstanceOf(MissingRecordError);
   });
 });
 
