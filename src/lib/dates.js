@@ -44,3 +44,14 @@ export function isDate(value) {
 export function isFuture(ymd) {
   return ymd > today();
 }
+
+const longDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+/**
+ * @param {string} ymd
+ * @returns {string} such as "14 March 2024"
+ */
+export function formatDate(ymd) {
+  const [year, month, day] = ymd.split('-').map(Number);
+  return longDate.format(new Date(year, month - 1, day));
+}

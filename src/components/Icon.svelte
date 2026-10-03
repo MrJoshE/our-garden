@@ -4,7 +4,13 @@
   const paths = {
     check: ['m5 12.5 4.5 4.5L19 7'],
     chevronDown: ['m6 9 6 6 6-6'],
+    chevronLeft: ['m15 18-6-6 6-6'],
     close: ['M18 6 6 18', 'M6 6l12 12'],
+    more: [
+      'M6.25 12a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0z',
+      'M13.25 12a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0z',
+      'M20.25 12a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0z'
+    ],
     plus: ['M12 5v14', 'M5 12h14'],
     search: ['M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z', 'm20 20-4-4'],
     // The one drawing for plants without a photo, and the empty states

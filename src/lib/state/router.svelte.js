@@ -62,30 +62,42 @@ export const route = $state({ ...parse(location.hash), sheet: history.state?.she
 let index = history.state?.index ?? 0;
 if (history.state?.index == null) history.replaceState({ ...history.state, index }, '');
 
-// Scroll positions per entry, kept in memory: writing them into history state
-// on every scroll would hit Safari's limit on replaceState calls.
+// Scroll positions and pages per entry, kept in memory: writing them into
+// history state on every scroll would hit Safari's limit on replaceState
+// calls. Entries from before a reload are not known, so back() treats them
+// as somewhere else.
 /** @type {Map<number, number>} */
 const scrollPositions = new Map();
+/** @type {Map<number, string>} */
+const entryPages = new Map([[index, currentPage()]]);
 history.scrollRestoration = 'manual';
 addEventListener('scroll', () => scrollPositions.set(index, scrollY), { passive: true });
 
+function currentPage() {
+  return location.hash.split('?')[0] || '#/';
+}
+
 /** @param {number} next */
 function startEntry(next) {
-  for (const key of scrollPositions.keys()) if (key >= next) scrollPositions.delete(key);
+  for (const entries of [scrollPositions, entryPages]) {
+    for (const key of entries.keys()) if (key >= next) entries.delete(key);
+  }
   index = next;
 }
 
 addEventListener('popstate', () => {
+  /** @type {'forward' | 'back'} */
+  let direction = 'forward';
   if (history.state?.index == null) {
-    // A link was followed: a new entry, going forward
+    // A link was followed: a new entry
     startEntry(index + 1);
     history.replaceState({ index }, '');
-    show('forward');
   } else {
-    const direction = history.state.index < index ? 'back' : 'forward';
+    if (history.state.index < index) direction = 'back';
     index = history.state.index;
-    show(direction);
   }
+  entryPages.set(index, currentPage());
+  show(direction);
 });
 
 /**
@@ -102,41 +114,71 @@ function show(direction, animate = true) {
     return;
   }
   const scroll = direction === 'back' ? (scrollPositions.get(index) ?? 0) : 0;
-  changePage(() => Object.assign(route, next), direction, scroll, animate);
+  // Between a garden and one of its plants, that plant's photo moves with the page
+  const plantId = next.plantId ?? route.plantId;
+  changePage(() => Object.assign(route, next), direction, scroll, animate, plantId);
 }
 
 // Counts page changes, so scroll and focus waiting on one page change give up
 // once another has started.
 let pageChanges = 0;
 
+// Waiting for back() to reach its page
+/** @type {(() => void)[]} */
+const pageWaiters = [];
+
+/** @param {number} scroll */
+const canScrollTo = (scroll) => document.documentElement.scrollHeight - innerHeight >= scroll;
+
 /**
  * @param {() => void} apply
  * @param {'forward' | 'back'} direction
  * @param {number} scroll
  * @param {boolean} animate
+ * @param {string | null} plantId
  */
-async function changePage(apply, direction, scroll, animate) {
+async function changePage(apply, direction, scroll, animate, plantId) {
   const change = ++pageChanges;
   document.documentElement.dataset.nav = direction;
+  const transitions = animate && !!document.startViewTransition;
+
+  // The card's cover and the plant page's cover share a name for the length
+  // of the transition, so the photo grows into place (brief section 13)
+  const cover = () => (plantId ? document.querySelector(`[data-cover="${CSS.escape(plantId)}"]`) : null);
+  /** @type {HTMLElement[]} */
+  const named = [];
+  const nameCover = () => {
+    const element = cover();
+    if (!transitions || !(element instanceof HTMLElement)) return;
+    element.style.viewTransitionName = 'plant-cover';
+    named.push(element);
+  };
+
   const update = async () => {
     apply();
     await tick();
+    for (const resolve of pageWaiters.splice(0)) resolve();
+    if (!animate) return;
     // A page draws when its data arrives, usually within a few milliseconds.
     // Waiting briefly for its heading lets the transition show the page, not
     // a blank one; the old page stays on screen meanwhile.
-    if (animate) await waitUntil(() => !!document.querySelector('main h1'), PAGE_WAIT_MS);
+    await waitUntil(() => !!document.querySelector('main h1') && (!plantId || !!cover()), PAGE_WAIT_MS);
+    if (canScrollTo(scroll)) scrollTo(0, scroll);
+    nameCover();
   };
-  if (animate && document.startViewTransition) {
+  if (transitions) {
+    nameCover();
     const transition = document.startViewTransition(update);
     // A newer page change skips this transition, which rejects `ready`
     transition.ready.catch(() => {});
+    transition.finished.finally(() => named.forEach((element) => (element.style.viewTransitionName = '')));
     await transition.updateCallbackDone;
   } else {
     await update();
   }
   const current = () => change === pageChanges;
   whenReady(
-    () => !current() || document.documentElement.scrollHeight - innerHeight >= scroll,
+    () => !current() || canScrollTo(scroll),
     () => current() && scrollTo(0, scroll)
   );
   const heading = () => document.querySelector('main h1');
@@ -189,7 +231,28 @@ export function navigate(hash, { replace = false } = {}) {
     startEntry(index + 1);
     history.pushState({ index }, '', hash);
   }
+  entryPages.set(index, currentPage());
   show('forward', !replace);
+}
+
+/**
+ * Goes up to a page, such as a plant's garden. When the entry before this
+ * one is that page, it goes back to it, so its scroll position returns;
+ * otherwise, such as after opening a link to the plant, this entry becomes
+ * that page.
+ * @param {string} hash such as paths.garden(id)
+ * @returns {Promise<void>} resolves once that page is showing
+ */
+export function back(hash) {
+  const shown = new Promise((resolve) => pageWaiters.push(() => resolve(undefined)));
+  if (entryPages.get(index - 1) === hash) {
+    history.back();
+  } else {
+    history.replaceState({ index }, '', hash);
+    entryPages.set(index, hash);
+    show('back');
+  }
+  return shown;
 }
 
 /**
@@ -218,6 +281,7 @@ export function setView(changes) {
 export function openSheet(name) {
   startEntry(index + 1);
   history.pushState({ index, sheet: name }, '');
+  entryPages.set(index, currentPage());
   route.sheet = name;
 }
 

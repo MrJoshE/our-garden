@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { isDate, isFuture, localDate, today } from './dates.js';
+import { formatDate, isDate, isFuture, localDate, today } from './dates.js';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -51,5 +51,11 @@ describe('dates', () => {
     expect(isFuture('2026-07-02')).toBe(false);
     expect(isFuture('2026-07-03')).toBe(true);
     expect(isFuture('2026-07-01')).toBe(false);
+  });
+
+  it('writes a chosen date out in words', () => {
+    expect(formatDate('2024-03-14')).toBe('14 March 2024');
+    expect(formatDate('2026-07-01')).toBe('1 July 2026');
+    expect(formatDate('2026-12-31')).toBe('31 December 2026');
   });
 });

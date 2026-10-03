@@ -13,7 +13,8 @@ export const strings = {
     back: 'Go back',
     dismiss: 'Dismiss',
     close: 'Close',
-    edit: 'Edit'
+    edit: 'Edit',
+    undo: 'Undo'
   },
 
   form: {
@@ -103,6 +104,18 @@ export const strings = {
     deleteConfirm: 'Delete garden'
   },
 
+  plant: {
+    /** @param {string} garden */
+    back: (garden) => `Back to ${garden}`,
+    menu: 'Plant options',
+    delete: 'Delete plant',
+    location: 'Location',
+    status: 'Status',
+    plantedOn: 'Planted',
+    careNotes: 'Care notes',
+    tags: 'Tags'
+  },
+
   gardenMenu: {
     /** @param {string} name */
     open: (name) => `${name}, switch garden`,
@@ -116,7 +129,8 @@ export const strings = {
     saved: 'Saved',
     plantAdded: 'Plant added',
     gardenAdded: 'Garden added',
-    gardenDeleted: 'Garden deleted'
+    gardenDeleted: 'Garden deleted',
+    plantDeleted: 'Plant deleted'
   },
 
   installHint: {
