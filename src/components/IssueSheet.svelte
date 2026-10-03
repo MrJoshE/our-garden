@@ -5,7 +5,7 @@
   import InlineProblem from './InlineProblem.svelte';
   import PhotoTray, { readyPhotos } from './PhotoTray.svelte';
   import Sheet from './Sheet.svelte';
-  import { createIssue, getDraft } from '../lib/db/index.js';
+  import { createIssue, getDraft, updateIssue } from '../lib/db/index.js';
   import { ISSUE_KINDS, LIMITS, SEVERITIES } from '../lib/constants.js';
   import { isFuture } from '../lib/dates.js';
   import { focusFirstProblem, saveFailure } from '../lib/forms.js';
@@ -14,8 +14,24 @@
   import { closeSheet } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
 
-  /** @type {{ open: boolean, plantId: string }} */
-  let { open, plantId } = $props();
+  /**
+   * Flags a problem, or with `issue`, edits one.
+   * @type {{
+   *   open: boolean,
+   *   plantId: string,
+   *   issue?: Record<string, any>,
+   *   onDelete?: (issue: Record<string, any>) => void
+   * }} onDelete: closes the sheet and deletes the problem
+   */
+  let { open, plantId, issue, onDelete } = $props();
+
+  // Stays the last problem edited, so the sheet keeps its edit look while it
+  // slides away after the problem is saved or deleted
+  /** @type {Record<string, any> | undefined} */
+  let editing = $state();
+  $effect(() => {
+    if (issue) editing = issue;
+  });
 
   const FIELDS = ['title', 'kind', 'severity', 'firstSeenOn', 'notes'];
   // "Other" until she says, rather than a guess that would mislabel the card
@@ -63,6 +79,11 @@
     errors = {};
     problem = null;
     saving = false;
+    // An edit starts from the problem as it is, and keeps no draft (brief section 7)
+    if (editing) {
+      values = { ...blank(), ...Object.fromEntries(FIELDS.map((field) => [field, editing?.[field] ?? ''])) };
+      return;
+    }
     const key = `issue:${plantId}`;
     const saved = await getDraft(key);
     if (closed()) return;
@@ -90,6 +111,12 @@
       // Photos still being processed are waited for, not left behind
       await tray?.settled();
       const { photos: picked, ...fields } = $state.snapshot(values);
+      if (editing) {
+        await updateIssue(editing.id, fields);
+        showToast(strings.toasts.saved);
+        closeSheet();
+        return;
+      }
       const photos = readyPhotos(picked).map((item) => item.photo);
       await createIssue(plantId, { ...fields, photos });
       await draft?.discard();
@@ -112,7 +139,7 @@
   }
 </script>
 
-<Sheet {open} title={strings.issueSheet.addTitle} onsubmit={submit}>
+<Sheet {open} title={editing ? strings.issueSheet.editTitle : strings.issueSheet.addTitle} onsubmit={submit}>
   <div class="stack">
     {#if problem}<InlineProblem {problem} />{/if}
     <Field
@@ -148,11 +175,20 @@
       bind:value={values.notes}
       error={errors.notes}
     />
-    <PhotoTray bind:this={tray} bind:photos={values.photos} />
+    {#if editing}
+      <hr />
+      <button class="btn btn-quiet btn-danger" type="button" onclick={() => editing && onDelete?.(editing)}>
+        {strings.issueSheet.delete}
+      </button>
+    {:else}
+      <PhotoTray bind:this={tray} bind:photos={values.photos} />
+    {/if}
   </div>
 
   {#snippet footer()}
     <button class="btn" type="button" onclick={cancel}>{strings.issueSheet.cancel}</button>
-    <button class="btn btn-primary" type="submit" aria-busy={saving ? 'true' : undefined}>{strings.issueSheet.save}</button>
+    <button class="btn btn-primary" type="submit" aria-busy={saving ? 'true' : undefined}>
+      {editing ? strings.issueSheet.saveEdit : strings.issueSheet.save}
+    </button>
   {/snippet}
 </Sheet>

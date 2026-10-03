@@ -968,6 +968,16 @@
   .issue-card .status > :first-child::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .issue-card .title { font-family: var(--font-serif); font-size: var(--text-lg); line-height: var(--leading-tight); }
   .issue-card[data-tone='resolved'] .title { color: var(--color-text-muted); text-decoration: line-through; text-decoration-color: var(--sage-300); }
+  /* A problem opens for editing when tapped anywhere on its card: its title
+     is a button stretched over the card, with the status buttons above it */
+  .issue-card:has(.issue-open) { position: relative; transition: background var(--dur-fast) var(--ease-out); }
+  .issue-card:has(.issue-open:active) { background: var(--color-surface-sunken); }
+  @media (hover: hover) { .issue-card:has(.issue-open:hover) { border-color: var(--color-border-strong); } }
+  .issue-card:has(.issue-open:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .issue-open { text-align: left; text-decoration: inherit; }
+  .issue-open:focus-visible { outline: none; }
+  .issue-open::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+  .issue-card .cluster { position: relative; z-index: 1; }
 
   /* ---- Timeline -------------------------------------------------------- */
   .timeline { display: flex; flex-direction: column; padding-inline: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }

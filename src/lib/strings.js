@@ -132,7 +132,8 @@ export const strings = {
     gardenDeleted: 'Garden deleted',
     plantDeleted: 'Plant deleted',
     entryDeleted: 'Entry deleted',
-    problemFlagged: 'Problem flagged'
+    problemFlagged: 'Problem flagged',
+    problemDeleted: 'Problem deleted'
   },
 
   dates: {
@@ -142,6 +143,9 @@ export const strings = {
 
   issueSheet: {
     addTitle: 'Flag a problem',
+    editTitle: 'Edit problem',
+    saveEdit: 'Save',
+    delete: 'Delete problem',
     title: 'What’s wrong',
     titleHint: 'Such as greenfly on the buds.',
     kind: 'Kind',
@@ -155,6 +159,8 @@ export const strings = {
   issues: {
     title: 'Problems',
     flag: 'Flag a problem',
+    /** @param {string} title */
+    edit: (title) => `Edit problem: ${title}`,
     reopen: 'Reopen',
     /** @param {number} count */
     resolvedGroup: (count) => `Resolved (${count})`,
