@@ -61,8 +61,8 @@ export async function listPlants(gardenId) {
   const flagged = new Set(issues.map((issue) => issue.plantId));
   const covers = await coversFor(plants);
   return plants
-    .map((plant) => ({ ...plant, needsAttention: flagged.has(plant.id), cover: covers.get(plant.id) ?? null }))
-    .sort((a, b) => isInactive(a) - isInactive(b) || compareText(a.commonName ?? '', b.commonName ?? ''));
+    .sort((a, b) => isInactive(a) - isInactive(b) || compareText(a.commonName ?? '', b.commonName ?? ''))
+    .map((plant) => ({ ...plant, needsAttention: flagged.has(plant.id), cover: covers.get(plant.id) ?? null }));
 }
 
 /**

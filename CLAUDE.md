@@ -18,6 +18,8 @@ Every feature or piece of implementation follows the same steps, in this order.
 6. Write the results of steps 4 and 5 in the pull request, including anything you decided not to fix and why.
 7. Stop for my review. When I approve, merge the pull request and close the issue.
 
+Until `/josh-analysis` exists, use `/implementation-rigor` in its place.
+
 Keep each issue and pull request to one feature. The five build steps at the end of the brief are the order of work, and each will usually need several issues.
 
 Use the `gh` CLI for issues and pull requests. Do not commit directly to `main`.
@@ -72,5 +74,6 @@ List what you found in the pull request, then fix it.
 - `npm run dev` to run the app locally (also served on your network, for testing on a phone)
 - `npm test` to run the tests, or `npm run test:watch` to keep them running
 - `npm run build` to make the production build, and `npm run preview` to serve it
+- `npm run check` to type-check the JSDoc in `src/lib`
 
 Update this section if the commands change.
