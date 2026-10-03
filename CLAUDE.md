@@ -11,15 +11,13 @@ Stack in short: Svelte 5 with runes, Vite, plain JavaScript, Dexie for IndexedDB
 Every feature or piece of implementation follows the same steps, in this order.
 
 1. Create a GitHub issue in this repo that describes the feature, what is in scope and how we will know it is done.
-2. Run `/triage-candidate` and `/josh-analysis` on the planned work before writing any code. Add what they find to the issue and adjust the plan.
+2. Run `/triage-candidate` and `/implementation-rigor` on the planned work before writing any code. Add what they find to the issue and adjust the plan.
 3. Start a Claude Code worktree for the work with `EnterWorktree` (it creates a branch from `origin/main` under `.claude/worktrees/`), run `npm ci` in it, and implement the feature there. Open a pull request that links the issue.
-4. Run `/triage-candidate` and `/josh-analysis` again on what was implemented.
+4. Run `/triage-candidate` and `/implementation-rigor` again on what was implemented.
 5. Do the edge case review described below and fix what it finds in the same pull request.
 6. Write the results of steps 4 and 5 in the pull request, including anything you decided not to fix and why.
 7. Merge the pull request and close the issue. There is no need to wait for my approval once steps 4 to 6 are done. From a worktree, merge with `gh pr merge <n> --squash`, then delete the branch with `git push origin --delete <branch>`. Do not use `--delete-branch`: it tries to switch the worktree to `main`, fails, and stops the hook below from running.
 8. After merging, make sure the main checkout has the latest `main` (a project hook in `.claude/settings.json` pulls it after `gh pr merge`). Remove the worktree with `ExitWorktree`: a squash merge makes its commits look unmerged, so once `git diff origin/main` in the worktree shows nothing, remove it with `discard_changes: true`. Then check the open issues and pull requests, and close any issue the merged work satisfies, with a comment that links the pull request.
-
-Until `/josh-analysis` exists, use `/implementation-rigor` in its place.
 
 Keep each issue and pull request to one feature. The five build steps at the end of the brief are the order of work, and each will usually need several issues.
 
