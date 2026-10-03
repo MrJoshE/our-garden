@@ -11,6 +11,7 @@
   import CheckButton from '../components/CheckButton.svelte';
   import EntryForm from '../components/EntryForm.svelte';
   import Icon from '../components/Icon.svelte';
+  import IssueList from '../components/IssueList.svelte';
   import Menu from '../components/Menu.svelte';
   import NotFound from '../components/NotFound.svelte';
   import Photo from '../components/Photo.svelte';
@@ -134,6 +135,8 @@
             {#each details.tags as tag}<li class="tag">{tag}</li>{/each}
           </ul>
         {/if}
+
+        {#if issues.value?.length}<IssueList issues={issues.value} />{/if}
       </div>
 
       <div class="stack stack-lg">
