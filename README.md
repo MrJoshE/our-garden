@@ -1,6 +1,6 @@
 # Garden Journal
 
-An installable web app for keeping a record of the plants in a garden. Everything stays on the device in IndexedDB. The brief is in `developer-agent-prompt.md`.
+An installable web app for keeping a record of the plants in a garden. Everything stays on the device in IndexedDB, and it works offline once installed. The brief is in `developer-agent-prompt.md`. The choices it didn't cover, and what was added to `theme.css`, are in `NOTES.md`.
 
 ## Run
 
@@ -9,6 +9,8 @@ npm install
 npm run dev      # served on your network too, so you can open it on a phone
 ```
 
+In development, the garden menu has **Load sample garden**, which adds a garden of 25 plants with entries, problems and drawn photos. It isn't in the production build.
+
 ## Test
 
 ```sh
@@ -16,7 +18,11 @@ npm test         # once
 npm run test:watch
 ```
 
-Tests run in Node against an in-memory IndexedDB (`fake-indexeddb`), in UK time.
+Tests run in Node against an in-memory IndexedDB (`fake-indexeddb`), in UK time. They cover the database module (including a backup export and import round trip) and `dates.js`.
+
+```sh
+npm run check    # type-checks the JSDoc in src/lib
+```
 
 ## Build
 
@@ -25,9 +31,16 @@ npm run build    # static files in dist/
 npm run preview
 ```
 
+## Using it on a phone
+
+- **iPhone:** open the site in Safari, tap Share, then Add to Home Screen, and use it from the Home Screen from then on. Safari and the Home Screen app keep separate storage, so a journal started in Safari doesn't appear in the installed app. The app says this on first run in Safari. To move one across, use Export in Backup and settings, then Restore a backup on the installed app's welcome screen.
+- **Android:** Chrome offers to install the app.
+- **Backups:** Backup and settings (in the garden menu) exports everything, photos included, as one zip. On iPhone it goes to the share sheet, so it can be saved to Files. Elsewhere it downloads. Import merges a backup into the journal, keeping the more recent copy of anything both have. A new phone can restore one from the welcome screen.
+- **Updates:** a new version waits until **Update now** is tapped on its banner. The app never reloads by itself.
+
 ## Deploy
 
-`dist/` is plain static files that any static host can serve. Serve them over HTTPS: the service worker won't run without it.
+`dist/` is plain static files that any static host can serve. Serve them over HTTPS: the service worker won't run without it. Over plain HTTP, such as the Pi's port 16000 or `npm run dev` on your network, the app still works but can't be used offline or installed.
 
 ### On a Raspberry Pi
 
