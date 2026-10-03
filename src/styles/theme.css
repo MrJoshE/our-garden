@@ -1052,7 +1052,11 @@
   dialog.sheet.is-closing::backdrop { animation: fade-out var(--dur-base) var(--ease-in) forwards; }
   .sheet-grabber { flex: none; width: 40px; height: 4px; margin: var(--space-2) auto 0; border-radius: 2px; background: var(--color-border-strong); }
   .sheet-header { flex: none; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4) var(--space-2) var(--space-5); }
-  .sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--space-2) var(--space-5) var(--space-5); }
+  /* The body and the form wrapping it start at their content's height
+     (flex-basis auto) and shrink to scroll when the sheet runs out of room.
+     With flex: 1 they would start at 0, and iPhone WebKit sizes the sheet
+     from that, leaving it the height of its header. */
+  .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--space-2) var(--space-5) var(--space-5); }
   .sheet-footer {
     flex: none;
     display: flex;
@@ -1065,7 +1069,7 @@
   .sheet-footer .btn { flex: 1; }
   /* A form wrapping a sheet's body and footer, so the body still scrolls
      and the footer stays put */
-  .sheet-form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .sheet-form { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 
   @media (min-width: 600px) {
     dialog.sheet { width: min(520px, calc(100vw - var(--space-8))); max-height: min(720px, calc(100dvh - var(--space-12))); margin: auto; border-radius: var(--radius-xl); }
