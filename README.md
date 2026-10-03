@@ -45,7 +45,7 @@ sudo cp garden-update.service garden-update.timer /etc/systemd/system/
 sudo cp Caddyfile /etc/caddy/Caddyfile
 sudo systemctl daemon-reload
 sudo systemctl enable --now garden-update.timer
-sudo systemctl reload caddy
+sudo systemctl restart caddy
 ```
 
 The first build starts straight away. Each build goes into `/srv/garden/releases/<commit>`, and `/srv/garden/current` only switches to it once the build has finished. A failed build leaves the site as it was and is tried again at the next check.
@@ -53,5 +53,5 @@ The first build starts straight away. Each build goes into `/srv/garden/releases
 - `journalctl -u garden-update` shows each deploy and any failures.
 - `sudo systemctl start garden-update` checks now instead of waiting.
 - To roll back, revert the commit on `main`. The Pi only ever serves `main`.
-- If the service, timer or Caddyfile in `deploy/` changes, copy it again, then run `sudo systemctl daemon-reload` and `sudo systemctl reload caddy`.
+- If the service, timer or Caddyfile in `deploy/` changes, copy it again, then run `sudo systemctl daemon-reload` and `sudo systemctl restart caddy`.
 - The Caddyfile replaces Debian's default one. If Caddy already serves other sites on the Pi, add this block to your own Caddyfile instead.
