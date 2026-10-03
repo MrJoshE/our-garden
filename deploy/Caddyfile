@@ -1,4 +1,6 @@
-:80 {
+# The scheme keeps this plain HTTP, and off port 80, even if a hostname is
+# added: with a hostname and no scheme Caddy turns on HTTPS and binds 80.
+http://:16000 {
 	root * /srv/garden/current
 	file_server
 	# Not immutable for hashed assets: a 404 for one cached for a year comes

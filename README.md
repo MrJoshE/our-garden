@@ -31,7 +31,7 @@ npm run preview
 
 ### On a Raspberry Pi
 
-The Pi checks GitHub every 5 minutes, builds any new commit on `main`, and Caddy serves it over HTTP on port 80. For HTTPS, point a Cloudflare Tunnel at `http://localhost:80`.
+The Pi checks GitHub every 5 minutes, builds any new commit on `main`, and Caddy serves it over HTTP on port 16000. For HTTPS, point a Cloudflare Tunnel at `http://localhost:16000`.
 
 You need a Pi 3, 4 or 5 running 64-bit Raspberry Pi OS Trixie, whose `nodejs` package (20.19) is new enough to build the app. Bookworm's is too old. npm warns that Vitest wants Node 22; that doesn't matter, because the Pi doesn't run the tests.
 
