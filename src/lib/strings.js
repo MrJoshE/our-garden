@@ -14,6 +14,11 @@ export const strings = {
     dismiss: 'Dismiss'
   },
 
+  navigation: {
+    toGardens: 'Go to your gardens',
+    toGarden: 'Back to the garden'
+  },
+
   gardenStatus: { active: 'Active', archived: 'Archived' },
   sun: { full: 'Full sun', part: 'Part shade', shade: 'Shade' },
   plantStatus: { growing: 'Growing', dormant: 'Dormant', removed: 'Removed', dead: 'Dead' },

@@ -8,7 +8,16 @@ import { logError } from '../log.js';
 export { ValidationError } from './fields.js';
 export { MissingRecordError, AutomaticEntryError } from './write.js';
 export { getMeta } from './meta.js';
-export { listGardens, getGarden, createGarden, updateGarden, deleteGarden, createFirstGarden } from './gardens.js';
+export {
+  listGardens,
+  getGarden,
+  setLastGarden,
+  findStartGardenId,
+  createGarden,
+  updateGarden,
+  deleteGarden,
+  createFirstGarden
+} from './gardens.js';
 export { listPlants, getPlant, createPlant, updatePlant, deletePlant, restorePlant } from './plants.js';
 export { listEntries, createEntry, updateEntry, deleteEntry, restoreEntry, checkToday } from './entries.js';
 export { listIssues, createIssue, updateIssue, setIssueStatus, deleteIssue, restoreIssue } from './issues.js';

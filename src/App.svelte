@@ -2,11 +2,16 @@
   import { onMount } from 'svelte';
   import { startDatabase } from './lib/db/index.js';
   import { app, block, reportError } from './lib/state/app.svelte.js';
+  import { paths, route } from './lib/state/router.svelte.js';
   import { explainError } from './lib/errors.js';
   import { strings } from './lib/strings.js';
   import ProblemBanner from './components/ProblemBanner.svelte';
   import ProblemScreen from './components/ProblemScreen.svelte';
   import Toasts from './components/Toasts.svelte';
+  import NotFound from './components/NotFound.svelte';
+  import Start from './pages/Start.svelte';
+  import Garden from './pages/Garden.svelte';
+  import Plant from './pages/Plant.svelte';
 
   let ready = $state(false);
 
@@ -34,10 +39,15 @@
     <ProblemBanner problem={app.problem} onDismiss={() => (app.problem = null)} />
   {/if}
   <svelte:boundary onerror={(error) => reportError(error, { operation: 'render' })}>
-    <!-- Pages arrive with the router (step 2.2). -->
-    <main class="page">
-      <h1>{strings.appName}</h1>
-    </main>
+    {#if route.name === 'start'}
+      <Start />
+    {:else if route.name === 'garden'}
+      <Garden />
+    {:else if route.name === 'plant'}
+      <Plant />
+    {:else}
+      <NotFound href={paths.start} label={strings.navigation.toGardens} />
+    {/if}
 
     {#snippet failed(error, reset)}
       <ProblemScreen problem={explainError(error)} onRetry={reset} />

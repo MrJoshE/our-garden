@@ -8,12 +8,14 @@ import {
   createIssue,
   createPlant,
   deleteGarden,
+  findStartGardenId,
   getCurrentPerson,
   getGarden,
   getMeta,
   listGardens,
   listPeople,
   listPlants,
+  setLastGarden,
   updateGarden,
   updatePerson
 } from './index.js';
@@ -101,6 +103,28 @@ describe('gardens', () => {
     }
     expect(await getMeta('lastGardenId')).toBeUndefined();
     expect((await listPlants(otherGarden)).map((p) => p.id)).toEqual([otherPlant]);
+  });
+});
+
+describe('which garden opens on start', () => {
+  it('is the last garden used', async () => {
+    await createGarden({ name: 'Allotment' });
+    const back = await createGarden({ name: 'Back garden' });
+    await setLastGarden(back);
+    expect(await findStartGardenId()).toBe(back);
+  });
+
+  it('falls back to the first active garden by name when the last one has gone', async () => {
+    const zinnias = await createGarden({ name: 'Zinnia beds' });
+    const allotment = await createGarden({ name: 'Allotment' });
+    await createGarden({ name: 'Aardvark Lane', status: 'archived' });
+    await setLastGarden(zinnias);
+    await deleteGarden(zinnias);
+    expect(await findStartGardenId()).toBe(allotment);
+  });
+
+  it('is none before first run', async () => {
+    expect(await findStartGardenId()).toBeNull();
   });
 });
 
