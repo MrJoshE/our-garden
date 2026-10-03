@@ -1,16 +1,20 @@
 <script>
+  import { tick } from 'svelte';
+  import { SvelteSet } from 'svelte/reactivity';
+  import EntrySheet from './EntrySheet.svelte';
   import InlineProblem from './InlineProblem.svelte';
   import Photo from './Photo.svelte';
-  import { listEntries, listPeople } from '../lib/db/index.js';
+  import { deleteEntry, listEntries, listPeople, restoreEntry } from '../lib/db/index.js';
   import { ENTRY_KINDS } from '../lib/constants.js';
   import { dayName } from '../lib/dates.js';
   import { explainError } from '../lib/errors.js';
-  import { app } from '../lib/state/app.svelte.js';
+  import { app, reportError, showToast } from '../lib/state/app.svelte.js';
   import { live } from '../lib/state/live.svelte.js';
+  import { closeSheet, openSheet, route } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
 
-  /** @type {{ plantId: string }} */
-  let { plantId } = $props();
+  /** @type {{ plantId: string, issues: Record<string, any>[] }} issues: all the plant's issues */
+  let { plantId, issues } = $props();
 
   const PAGE = 30;
   const SHOWN_PHOTOS = 3;
@@ -42,6 +46,34 @@
 
   /** @param {Record<string, any>} entry */
   const meta = (entry) => [names.get(entry.doneBy), entry.editedAt && strings.timeline.edited].filter(Boolean).join(' · ');
+
+  // The entry open in the edit sheet, named by the sheet's history entry
+  const editing = $derived(entries.value?.entries.find((entry) => route.sheet === `entry:${entry.id}`));
+
+  // Entries on their way out play .is-leaving first (brief section 13)
+  const leaving = new SvelteSet();
+
+  /** @param {Record<string, any>} entry */
+  async function remove(entry) {
+    closeSheet();
+    leaving.add(entry.id);
+    await tick();
+    const element = document.querySelector(`[data-entry="${entry.id}"]`);
+    await Promise.allSettled(element?.getAnimations().map((animation) => animation.finished) ?? []);
+    try {
+      const deletedAt = await deleteEntry(entry.id);
+      showToast(strings.toasts.entryDeleted, {
+        action: {
+          label: strings.actions.undo,
+          run: () => restoreEntry(entry.id, deletedAt).catch((error) => reportError(error, { operation: 'restoreEntry', entryId: entry.id }))
+        }
+      });
+    } catch (error) {
+      reportError(error, { operation: 'deleteEntry', entryId: entry.id });
+    } finally {
+      leaving.delete(entry.id);
+    }
+  }
 </script>
 
 <section class="stack" aria-labelledby={headingId}>
@@ -75,14 +107,23 @@
             class="timeline-item"
             class:is-auto={entry.auto}
             class:is-new={entry.createdAt > openedAt}
+            class:is-leaving={leaving.has(entry.id)}
             data-kind={entry.kind}
+            data-entry={entry.id}
           >
             <div class="entry-head">
-              <!-- The app's own entries say what happened in their note, not their kind -->
+              <!-- The app's own entries say what happened in their note, not their kind, and can't be changed -->
               {#if entry.auto}
                 <span>{entry.note}</span>
               {:else}
-                <span class="entry-kind">{ENTRY_KINDS.label(entry.kind)}</span>
+                <button
+                  class="entry-kind entry-open"
+                  type="button"
+                  aria-label={strings.timeline.edit(ENTRY_KINDS.label(entry.kind), dayName(day.date, app.today))}
+                  onclick={() => openSheet(`entry:${entry.id}`)}
+                >
+                  {ENTRY_KINDS.label(entry.kind)}
+                </button>
               {/if}
               {#if details}<span class="entry-meta">{details}</span>{/if}
             </div>
@@ -120,3 +161,5 @@
     {/if}
   {/if}
 </section>
+
+<EntrySheet entry={editing} {issues} onDelete={remove} />

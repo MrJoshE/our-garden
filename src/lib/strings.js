@@ -130,7 +130,8 @@ export const strings = {
     plantAdded: 'Plant added',
     gardenAdded: 'Garden added',
     gardenDeleted: 'Garden deleted',
-    plantDeleted: 'Plant deleted'
+    plantDeleted: 'Plant deleted',
+    entryDeleted: 'Entry deleted'
   },
 
   dates: {
@@ -178,7 +179,19 @@ export const strings = {
     },
     product: 'Product',
     edited: 'Edited',
-    earlier: 'Show earlier'
+    earlier: 'Show earlier',
+    /**
+     * @param {string} kind
+     * @param {string} day
+     */
+    edit: (kind, day) => `Edit ${kind} entry, ${day}`
+  },
+
+  entrySheet: {
+    title: 'Edit entry',
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete entry'
   },
 
   installHint: {

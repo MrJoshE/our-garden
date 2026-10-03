@@ -1,5 +1,5 @@
 <script>
-  import { deletePlant, getGarden, getPlant, restorePlant } from '../lib/db/index.js';
+  import { deletePlant, getGarden, getPlant, listIssues, restorePlant } from '../lib/db/index.js';
   import { PLANT_STATUSES, tintFor } from '../lib/constants.js';
   import { formatDate } from '../lib/dates.js';
   import { explainError } from '../lib/errors.js';
@@ -20,6 +20,7 @@
 
   const garden = live(() => route.gardenId ?? '', getGarden);
   const plant = live(() => route.plantId ?? '', getPlant);
+  const issues = live(() => route.plantId ?? '', listIssues);
 
   // A plant reached through another garden's address is not found here
   const found = $derived(plant.value && garden.value && plant.value.gardenId === garden.value.id);
@@ -138,8 +139,8 @@
       <div class="stack stack-lg">
         <CheckButton plant={details} />
         {#key details.id}
-          <EntryForm plantId={details.id} />
-          <Timeline plantId={details.id} />
+          <EntryForm plantId={details.id} issues={issues.value ?? []} />
+          <Timeline plantId={details.id} issues={issues.value ?? []} />
         {/key}
       </div>
     </div>

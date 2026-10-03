@@ -2,18 +2,17 @@
   import EntryFields from './EntryFields.svelte';
   import Icon from './Icon.svelte';
   import InlineProblem from './InlineProblem.svelte';
-  import { createEntry, getDraft, listIssues } from '../lib/db/index.js';
+  import { createEntry, getDraft } from '../lib/db/index.js';
   import { ACTIVE_ISSUE_STATUSES } from '../lib/constants.js';
   import { isFuture } from '../lib/dates.js';
   import { focusFirstProblem, saveFailure } from '../lib/forms.js';
   import { logError } from '../lib/log.js';
   import { app, showToast } from '../lib/state/app.svelte.js';
   import { keepDraft } from '../lib/state/drafts.js';
-  import { live } from '../lib/state/live.svelte.js';
   import { strings } from '../lib/strings.js';
 
-  /** @type {{ plantId: string }} */
-  let { plantId } = $props();
+  /** @type {{ plantId: string, issues: Record<string, any>[] }} issues: all the plant's issues */
+  let { plantId, issues } = $props();
 
   const FIELDS = ['note', 'kind', 'occurredOn', 'product', 'issueId'];
   const blank = () => ({ note: '', kind: 'observation', occurredOn: '', product: '', issueId: '' });
@@ -28,8 +27,7 @@
   /** @type {ReturnType<typeof keepDraft> | null} */
   let draft = null;
 
-  const issues = live(() => plantId, listIssues);
-  const openIssues = $derived((issues.value ?? []).filter((issue) => ACTIVE_ISSUE_STATUSES.includes(issue.status)));
+  const openIssues = $derived(issues.filter((issue) => ACTIVE_ISSUE_STATUSES.includes(issue.status)));
 
   // The same rule the database applies: a note, or a kind other than Observation
   const canSave = $derived(values.note.trim() !== '' || values.kind !== 'observation');
