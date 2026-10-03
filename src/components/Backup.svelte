@@ -1,6 +1,8 @@
 <script>
   import { untrack } from 'svelte';
+  import ImportBackup from './ImportBackup.svelte';
   import InlineProblem from './InlineProblem.svelte';
+  import PhotoProgress from './PhotoProgress.svelte';
   import { exportJournal, setMeta } from '../lib/db/index.js';
   import { daysSince, formatDate, localDate, today } from '../lib/dates.js';
   import { explainError } from '../lib/errors.js';
@@ -108,41 +110,35 @@
   const isDomError = (error, name) => error instanceof DOMException && error.name === name;
 </script>
 
-<section class="stack stack-sm">
-  {#if problem}<InlineProblem {problem} onRetry={ready ? () => save(true) : start} />{/if}
-  <ul class="list">
-    <li class="list-row">
-      <div class="grow stack stack-sm">
-        <div>
-          <div role="status">
-            <p>{status}</p>
-            {#if unreadable}<p class="hint">{strings.backup.unreadable(unreadable)}</p>{/if}
-          </div>
-          <p class="hint">{strings.backup.hint}</p>
+<ul class="list">
+  <li class="list-row">
+    <div class="grow stack stack-sm">
+      <div>
+        <div role="status">
+          <p>{status}</p>
+          {#if unreadable}<p class="hint">{strings.backup.unreadable(unreadable)}</p>{/if}
         </div>
-        {#if progress}
-          <div
-            class="progress"
-            role="progressbar"
-            aria-label={strings.backup.preparing}
-            aria-valuemin="0"
-            aria-valuemax={progress.total}
-            aria-valuenow={progress.done}
-            aria-valuetext={strings.backup.progress(progress.done, progress.total)}
-          >
-            <i style:--value={progress.total ? (progress.done / progress.total) * 100 : 0}></i>
-          </div>
-        {/if}
-        <div>
-          {#if ready}
-            <button class="btn btn-primary" type="button" onclick={() => save(true)}>{strings.backup.save}</button>
-          {:else}
-            <button class="btn" type="button" aria-busy={progress ? 'true' : undefined} onclick={start}>
-              {strings.backup.export}
-            </button>
-          {/if}
-        </div>
+        <p class="hint">{strings.backup.hint}</p>
       </div>
-    </li>
-  </ul>
-</section>
+      {#if progress}<PhotoProgress label={strings.backup.preparing} {...progress} />{/if}
+      {#if problem}<InlineProblem {problem} onRetry={ready ? () => save(true) : start} />{/if}
+      <div>
+        {#if ready}
+          <button class="btn btn-primary" type="button" onclick={() => save(true)}>{strings.backup.save}</button>
+        {:else}
+          <button class="btn" type="button" aria-busy={progress ? 'true' : undefined} onclick={start}>
+            {strings.backup.export}
+          </button>
+        {/if}
+      </div>
+    </div>
+  </li>
+  <li class="list-row">
+    <ImportBackup
+      {open}
+      title={strings.backup.importTitle}
+      hint={strings.backup.importHint}
+      label={strings.backup.import}
+    />
+  </li>
+</ul>

@@ -23,7 +23,8 @@ export const SCHEMA_VERSION = 1;
  *
  * Schema changes go through new versions only. Never edit an existing
  * version's stores. Each new version needs an upgrade that also writes its
- * number to schemaVersion in meta, for example:
+ * number to schemaVersion in meta, and importJournal (backup.js) needs to
+ * upgrade backups made at older versions in the same way. For example:
  *
  *   db.version(2).stores({ ... }).upgrade(async (tx) => {
  *     ...

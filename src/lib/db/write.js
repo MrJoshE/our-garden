@@ -119,6 +119,18 @@ export class Writer {
   }
 
   /**
+   * Saves a record from a backup as it is, keeping its own id and
+   * timestamps, and logs it as created or as changed from `existing`.
+   * @param {string} table
+   * @param {Record<string, any>} record
+   * @param {Record<string, any> | undefined} existing this device's record with the same id
+   */
+  async putImported(table, record, existing) {
+    await db.table(table).put(record);
+    await this.#log(table, record, existing ? 'update' : 'create', existing ? changedFields(existing, record) : Object.keys(record));
+  }
+
+  /**
    * Soft deletes one record.
    * @param {string} table
    * @param {string} id

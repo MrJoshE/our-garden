@@ -27,6 +27,29 @@ function ago(days, date) {
   return days <= 0 ? 'today' : days === 1 ? 'yesterday' : days < 14 ? `${days} days ago` : `on ${date}`;
 }
 
+const list = new Intl.ListFormat('en-GB');
+
+/** What an import summary names, by table, as [one, many] */
+const IMPORTED = {
+  gardens: ['garden', 'gardens'],
+  plants: ['plant', 'plants'],
+  issues: ['problem', 'problems'],
+  entries: ['entry', 'entries'],
+  photos: ['photo', 'photos']
+};
+
+/**
+ * @param {Record<string, number>} counts by table
+ * @returns {string} such as "3 plants, 12 entries and 8 photos", or '' for none
+ */
+function importedCounts(counts) {
+  return list.format(
+    Object.entries(IMPORTED)
+      .filter(([table]) => counts[table] > 0)
+      .map(([table, [one, many]]) => `${counts[table]} ${counts[table] === 1 ? one : many}`)
+  );
+}
+
 export const strings = {
   appName: 'Garden Journal',
   other: 'Other',
@@ -55,7 +78,10 @@ export const strings = {
     intro: 'Start with your name and the name of your garden. You can add more gardens later.',
     personName: 'Your name',
     gardenName: 'Garden name',
-    submit: 'Start the journal'
+    submit: 'Start the journal',
+    restoreTitle: 'Moving from another device?',
+    restoreHint: 'Restore your journal from a backup file made with Export.',
+    restore: 'Restore a backup'
   },
 
   garden: {
@@ -256,6 +282,19 @@ export const strings = {
      */
     progress: (done, total) => `${done} of ${total} photos`,
     ready: 'Your backup is ready',
+    importTitle: 'Import a backup',
+    importHint: 'Adds anything new from a backup file. Where both have the same thing, the more recent change is kept.',
+    import: 'Import',
+    importing: 'Importing your backup',
+    /** @param {{ added: Record<string, number>, updated: Record<string, number>, skipped: number }} summary */
+    imported: ({ added, updated, skipped }) => {
+      const sentences = [];
+      if (importedCounts(added)) sentences.push(`Added ${importedCounts(added)}.`);
+      if (importedCounts(updated)) sentences.push(`Updated ${importedCounts(updated)}.`);
+      if (sentences.length === 0) sentences.push('There was nothing new in this backup.');
+      if (skipped) sentences.push(`${skipped === 1 ? 'One item' : `${skipped} items`} in the file couldn’t be read, so ${skipped === 1 ? 'it was' : 'they were'} left out.`);
+      return sentences.join(' ');
+    },
     /** @param {number} count */
     unreadable: (count) =>
       count === 1
@@ -386,6 +425,14 @@ export const strings = {
     blocked: {
       title: 'Close your other Garden Journal tabs',
       message: 'An update is waiting for Garden Journal to close in your other tabs or windows. Close them and it will carry on by itself.'
+    },
+    notBackup: {
+      title: 'This isn’t a Garden Journal backup',
+      message: 'Choose the zip file that Export made, named like garden-journal-2026-10-03.zip. Nothing has been changed.'
+    },
+    newerBackup: {
+      title: 'This backup is from a newer Garden Journal',
+      message: 'Reload while online to update the app, then import it again. Nothing has been changed.'
     },
     unknown: {
       title: 'Something went wrong',

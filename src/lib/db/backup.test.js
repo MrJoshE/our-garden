@@ -1,7 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { strFromU8, unzipSync } from 'fflate';
+import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 import { db, SCHEMA_VERSION } from './schema.js';
-import { createEntry, exportJournal, saveDraft } from './index.js';
+import {
+  createEntry,
+  createIssue,
+  createPlant,
+  exportJournal,
+  getCurrentPerson,
+  importJournal,
+  saveDraft,
+  updatePlant
+} from './index.js';
 import { makePhoto, resetDatabase, startGarden } from '../../test/helpers.js';
 
 beforeEach(resetDatabase);
@@ -10,6 +19,26 @@ beforeEach(resetDatabase);
 async function unzip(zip) {
   return unzipSync(new Uint8Array(await zip.arrayBuffer()));
 }
+
+/** Every journal record by table, with photo files read out so they compare by content */
+async function journal() {
+  const names = db.tables.map((table) => table.name).filter((name) => !['drafts', 'changes', 'meta'].includes(name));
+  /** @type {Record<string, any[]>} */
+  const tables = {};
+  for (const name of names) {
+    const records = await db.table(name).toArray();
+    tables[name] =
+      name === 'photos'
+        ? await Promise.all(
+            records.map(async (photo) => ({ ...photo, blob: await photo.blob?.text(), thumb: await photo.thumb?.text() }))
+          )
+        : records;
+  }
+  return tables;
+}
+
+/** @param {unknown} data what garden-journal.json holds */
+const backupOf = (data) => new Blob([zipSync({ 'garden-journal.json': strToU8(JSON.stringify(data)) })]);
 
 describe('backup export', () => {
   it('holds every record except drafts, and each photo and thumbnail as a file named by its id', async () => {
@@ -62,5 +91,111 @@ describe('backup export', () => {
       [1, 2],
       [2, 2]
     ]);
+  });
+});
+
+describe('backup import', () => {
+  it('restores an exported journal into an empty database', async () => {
+    const { plantId } = await startGarden();
+    await createEntry(plantId, { note: 'Flowering', photos: [makePhoto()] });
+    await createIssue(plantId, { title: 'Aphids', photos: [makePhoto()] });
+    const before = await journal();
+    const history = await db.changes.toArray();
+    const { zip } = await exportJournal();
+    await resetDatabase();
+
+    const summary = await importJournal(zip);
+
+    expect(await journal()).toEqual(before);
+    expect(await db.changes.toArray()).toEqual(expect.arrayContaining(history));
+    expect((await getCurrentPerson())?.id).toBe(before.people[0].id);
+    expect(summary).toEqual({
+      added: { gardens: 1, people: 1, plants: 1, issues: 1, entries: 2, photos: 2 },
+      updated: {},
+      skipped: 0
+    });
+  });
+
+  it('restores a backup that was unzipped and zipped again inside a folder', async () => {
+    const { plantId } = await startGarden();
+    await createEntry(plantId, { photos: [makePhoto()] });
+    const before = await journal();
+    const files = await unzip((await exportJournal()).zip);
+    const rezipped = Object.fromEntries(Object.entries(files).map(([name, data]) => [`garden-journal-2026-10-03/${name}`, data]));
+    rezipped['__MACOSX/garden-journal-2026-10-03/._garden-journal.json'] = strToU8('mac metadata');
+    await resetDatabase();
+
+    await importJournal(new Blob([zipSync(rezipped)]));
+
+    expect(await journal()).toEqual(before);
+  });
+
+  it('keeps whichever copy of a record was changed more recently', async () => {
+    const { gardenId, plantId: foxglove } = await startGarden();
+    const rose = await createPlant(gardenId, { commonName: 'Rose' });
+    const { zip: older } = await exportJournal();
+    await updatePlant(foxglove, { commonName: 'Foxglove, white' });
+    const { zip: newer } = await exportJournal();
+
+    await resetDatabase();
+    await importJournal(older);
+    await updatePlant(rose, { commonName: 'Rose, climbing' });
+    const summary = await importJournal(newer);
+
+    expect((await db.plants.get(foxglove))?.commonName).toBe('Foxglove, white');
+    expect((await db.plants.get(rose))?.commonName).toBe('Rose, climbing');
+    expect(summary).toEqual({ added: {}, updated: { plants: 1 }, skipped: 0 });
+  });
+
+  it('keeps this device’s photo file when a newer copy of the photo arrives without one', async () => {
+    const { plantId } = await startGarden();
+    await createEntry(plantId, { photos: [makePhoto()] });
+    const [photo] = await db.photos.toArray();
+    const { zip: withFiles } = await exportJournal();
+    const later = new Date(Date.parse(photo.updatedAt) + 1000).toISOString();
+    await db.photos.update(photo.id, { caption: 'Seedlings', updatedAt: later, blob: null, thumb: null });
+    const { zip: withoutFiles } = await exportJournal();
+
+    await resetDatabase();
+    await importJournal(withFiles);
+    await importJournal(withoutFiles);
+
+    const restored = await db.photos.get(photo.id);
+    expect(restored?.caption).toBe('Seedlings');
+    expect(await restored?.blob?.text()).toBe('full');
+  });
+
+  it('refuses a backup from a newer version of the app, changing nothing', async () => {
+    await startGarden();
+    const before = await journal();
+
+    await expect(importJournal(backupOf({ schemaVersion: SCHEMA_VERSION + 1, tables: {} }))).rejects.toMatchObject({
+      reason: 'newerBackup'
+    });
+    expect(await journal()).toEqual(before);
+  });
+
+  it('refuses a file that is not a backup, changing nothing', async () => {
+    await startGarden();
+    const before = await journal();
+
+    for (const file of [
+      new Blob(['not a zip']),
+      new Blob([zipSync({ 'notes.txt': strToU8('hello') })]),
+      new Blob([zipSync({ 'garden-journal.json': strToU8('{ broken') })]),
+      backupOf({ hello: 'world' })
+    ]) {
+      await expect(importJournal(file)).rejects.toMatchObject({ reason: 'notBackup' });
+    }
+    expect(await journal()).toEqual(before);
+  });
+
+  it('leaves out records too damaged to use, and counts them', async () => {
+    const summary = await importJournal(
+      backupOf({ schemaVersion: SCHEMA_VERSION, tables: { plants: [{ commonName: 'No id' }, null, 'plant'] } })
+    );
+
+    expect(summary).toEqual({ added: {}, updated: {}, skipped: 3 });
+    expect(await db.plants.count()).toBe(0);
   });
 });
