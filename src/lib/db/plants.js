@@ -27,6 +27,27 @@ const PLANT_CHILDREN = ['entries', 'issues', 'photos'];
 /** @param {Record<string, any>} plant */
 const isInactive = (plant) => Number(INACTIVE_PLANT_STATUSES.includes(plant.status));
 
+/** @param {Record<string, any>} photo */
+const takenOrAdded = (photo) => photo.takenAt ?? photo.createdAt;
+
+/**
+ * Each plant's cover, by plant id: its chosen photo, or if that has been
+ * deleted, the most recently taken photo it has left.
+ * @param {Record<string, any>[]} plants
+ * @returns {Promise<Map<string, Record<string, any>>>}
+ */
+async function coversFor(plants) {
+  const chosen = await db.photos.bulkGet(plants.map((plant) => plant.coverPhotoId).filter(Boolean));
+  const covers = new Map(chosen.filter(isCurrent).map((photo) => [photo.plantId, photo]));
+  const uncovered = plants.filter((plant) => !covers.has(plant.id)).map((plant) => plant.id);
+  const remaining = await db.photos.where('plantId').anyOf(uncovered).filter(isCurrent).toArray();
+  for (const photo of remaining) {
+    const best = covers.get(photo.plantId);
+    if (!best || takenOrAdded(photo) > takenOrAdded(best)) covers.set(photo.plantId, photo);
+  }
+  return covers;
+}
+
 /**
  * The plants in a garden for the grid: removed and dead last, otherwise by
  * name. Each has `needsAttention` and its `cover` photo (or null).
@@ -38,23 +59,22 @@ export async function listPlants(gardenId) {
     db.issues.where('gardenId').equals(gardenId).filter(isActiveIssue).toArray()
   ]);
   const flagged = new Set(issues.map((issue) => issue.plantId));
-  const coverIds = plants.map((plant) => plant.coverPhotoId).filter(Boolean);
-  const covers = new Map((await db.photos.bulkGet(coverIds)).filter(isCurrent).map((photo) => [photo.id, photo]));
+  const covers = await coversFor(plants);
   return plants
-    .map((plant) => ({ ...plant, needsAttention: flagged.has(plant.id), cover: covers.get(plant.coverPhotoId) ?? null }))
+    .map((plant) => ({ ...plant, needsAttention: flagged.has(plant.id), cover: covers.get(plant.id) ?? null }))
     .sort((a, b) => isInactive(a) - isInactive(b) || compareText(a.commonName ?? '', b.commonName ?? ''));
 }
 
 /**
  * One plant with `needsAttention`, `lastCheckedOn` (the date of its most
- * recent entry of any kind) and its `cover` photo. Undefined if it is missing
- * or deleted.
+ * recent entry of any kind) and its `cover` photo (or null). Undefined if it
+ * is missing or deleted.
  * @param {string} id
  */
 export async function getPlant(id) {
   const plant = current(await db.plants.get(id));
   if (!plant) return undefined;
-  const [activeIssues, lastEntry, cover] = await Promise.all([
+  const [activeIssues, lastEntry, covers] = await Promise.all([
     db.issues.where('plantId').equals(id).filter(isActiveIssue).count(),
     db.entries
       .where('[plantId+occurredOn]')
@@ -62,13 +82,13 @@ export async function getPlant(id) {
       .reverse()
       .filter(isCurrent)
       .first(),
-    plant.coverPhotoId ? db.photos.get(plant.coverPhotoId) : undefined
+    coversFor([plant])
   ]);
   return {
     ...plant,
     needsAttention: activeIssues > 0,
     lastCheckedOn: lastEntry?.occurredOn ?? null,
-    cover: current(cover) ?? null
+    cover: covers.get(id) ?? null
   };
 }
 

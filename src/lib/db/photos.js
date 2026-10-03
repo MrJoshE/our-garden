@@ -1,4 +1,4 @@
-import { db, isCurrent } from './schema.js';
+import { db } from './schema.js';
 import { write } from './write.js';
 import { ValidationError, clean, longText, number, shortText, timestamp } from './fields.js';
 import { LIMITS, PHOTO_PURGE_DAYS } from '../constants.js';
@@ -31,8 +31,9 @@ export function cleanPhotos(photos) {
 }
 
 /**
- * Saves photos for a plant inside a write. If the plant has no cover, or its
- * cover was deleted, the first of these becomes the cover.
+ * Saves photos for a plant inside a write. If the plant has never had a
+ * cover, the first of these becomes it. A deleted cover is kept, so undo can
+ * bring it back; until then plants.js falls back to the latest photo.
  * @param {import('./write.js').Writer} w
  * @param {Record<string, any>} plant
  * @param {Record<string, any>[]} photos already cleaned
@@ -46,8 +47,7 @@ export async function addPhotoRecords(w, plant, photos, { entryId, issueId = nul
     const record = await w.create('photos', { gardenId: plant.gardenId, plantId: plant.id, entryId, issueId, ...photo });
     ids.push(record.id);
   }
-  const cover = plant.coverPhotoId ? await db.photos.get(plant.coverPhotoId) : undefined;
-  if (!isCurrent(cover)) await w.update('plants', plant.id, { coverPhotoId: ids[0] });
+  if (plant.coverPhotoId == null) await w.update('plants', plant.id, { coverPhotoId: ids[0] });
 }
 
 /**

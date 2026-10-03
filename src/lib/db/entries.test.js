@@ -166,16 +166,6 @@ describe('deleting an entry', () => {
     expect(entry.id).toBe(id);
     expect(entry.photos).toHaveLength(2);
   });
-
-  it('leaves the plant with no cover if the cover photo goes, and the next photo becomes the cover', async () => {
-    const { plantId } = await startGarden();
-    const id = await createEntry(plantId, { photos: [makePhoto()] });
-    await deleteEntry(id);
-    expect((await getPlant(plantId))?.cover).toBeNull();
-    const next = await createEntry(plantId, { photos: [makePhoto()] });
-    const [photo] = await db.photos.where('entryId').equals(next).toArray();
-    expect((await getPlant(plantId))?.coverPhotoId).toBe(photo.id);
-  });
 });
 
 describe('the timeline', () => {
