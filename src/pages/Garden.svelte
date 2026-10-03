@@ -92,10 +92,13 @@
           </p>
         {/if}
       </div>
-      <button class="btn btn-primary only-wide" type="button" onclick={() => openSheet('add-plant')}>
-        <Icon name="plus" />
-        {strings.plantSheet.add}
-      </button>
+      <!-- An empty garden has its own Add plant button, in the empty state -->
+      {#if all.length}
+        <button class="btn btn-primary only-wide" type="button" onclick={() => openSheet('add-plant')}>
+          <Icon name="plus" />
+          {strings.plantSheet.add}
+        </button>
+      {/if}
     </div>
 
     {#if searchable}
@@ -167,10 +170,12 @@
     {/if}
   </main>
 
-  <button class="btn btn-primary fab" type="button" onclick={() => openSheet('add-plant')}>
-    <Icon name="plus" />
-    {strings.plantSheet.add}
-  </button>
+  {#if all.length}
+    <button class="btn btn-primary fab" type="button" onclick={() => openSheet('add-plant')}>
+      <Icon name="plus" />
+      {strings.plantSheet.add}
+    </button>
+  {/if}
 
   <PlantSheet open={route.sheet === 'add-plant'} gardenId={garden.value.id} />
   <GardenSheet open={route.sheet === 'add-garden'} />

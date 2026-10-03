@@ -340,13 +340,15 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
+    min-width: 0;
     min-height: var(--tap);
     margin-inline-start: calc(var(--space-2) * -1);
     padding-inline: var(--space-2);
     border-radius: var(--radius-pill);
     color: var(--color-text-soft);
   }
-  .appbar-switcher .eyebrow { color: inherit; }
+  /* One line, as a native title bar; the page heading shows the whole name */
+  .appbar-switcher .eyebrow { overflow: hidden; color: inherit; text-overflow: ellipsis; white-space: nowrap; }
   .appbar-switcher svg { width: 1em; height: 1em; flex: none; }
   .appbar-switcher:active { background: var(--color-surface-sunken); }
   @media (hover: hover) { .appbar-switcher:hover { background: var(--color-surface-sunken); } }
@@ -1051,11 +1053,12 @@
     gap: var(--space-3);
     width: 100%;
     min-height: var(--tap);
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-md);
     text-align: left;
     text-decoration: none;
     font-weight: var(--weight-medium);
+    overflow-wrap: anywhere;
   }
   .menu-item:active, .menu-item[aria-current='true'], .menu-item[aria-current='page'] { background: var(--color-surface-sunken); }
   .menu-item svg { width: 1.2em; height: 1.2em; flex: none; }
@@ -1142,7 +1145,7 @@
     color: var(--color-text-muted);
     animation: fade-in var(--dur-slow) var(--ease-out) both;
   }
-  .empty svg { width: 72px; height: 72px; color: var(--sage-300); }
+  .empty > svg { width: 72px; height: 72px; color: var(--sage-300); }
   .empty :is(h1, h2) { color: var(--color-text); }
   /* A whole-page message (such as "can't save in this browser") is the page's
      main heading but should not be display size */
