@@ -43,6 +43,23 @@ List what you found in the pull request, then fix it.
 - Only write a comment when what the code is doing would not be clear to a senior engineer. Do not write comments that restate the code, describe the change you made, or narrate what happens next.
 - Never write a literal colour, size or duration in a component. Use the tokens and classes in `theme.css`.
 
+## Feel
+
+- Make the app feel as native as possible on iOS and Android while keeping the look of `theme.css`. Prefer the platform's own behaviour and controls (native `dialog`, date and file pickers, the share sheet, back gesture and button, safe areas, momentum scrolling, instant touch feedback) over web-page conventions or custom widgets.
+- Where feeling native and following the theme pull in different directions, keep the theme where you can and raise the conflict rather than quietly picking one.
+
+## Errors
+
+- Log every error verbosely through `logError` in `src/lib/log.js`, with context: the operation, table names, record ids and field names, plus the error's name, message, stack and any wrapped causes. The log keeps the last 50 records in meta for the settings screen, and forwards each record to sinks added with `addErrorSink`. That is where an analytics service such as Firebase will plug in later.
+- Never put journal content in a log record: no notes, names, titles, search text or photos. Log ids, table and field names and error details only, because these records may leave the device one day.
+- Every error a user sees must say plainly what went wrong and what they can do next (try again, reload, make a backup and free space, go back, open in a normal window). Turn errors into messages with `explainError` in `src/lib/errors.js` rather than writing messages ad hoc, and never show a raw error message or stack. Keep everything the user typed when something fails.
+- Do not add Firebase or any other network sink until asked. The brief says the app makes no network requests after loading, so adding one is a decision to make deliberately.
+
+## Dependencies
+
+- Always use the latest stable release of build and test tools (Vite, `@sveltejs/vite-plugin-svelte`, Svelte, Vitest and the like). Check with `npm view <package> version` before installing, and run `npm outdated` at the start of each step and upgrade anything that is behind. If a tool has to be held back, say which and why.
+- Keep external dependencies to a minimum. Prefer the platform and a few lines of our own code over a package, even one the brief allows, and add each listed package only when the step that uses it begins.
+
 ## Tests
 
 - Do not write UI tests. They are of no use to this project.
@@ -52,8 +69,8 @@ List what you found in the pull request, then fix it.
 
 ## Commands
 
-- `npm run dev` to run the app locally
-- `npm test` to run the tests
-- `npm run build` to make the production build
+- `npm run dev` to run the app locally (also served on your network, for testing on a phone)
+- `npm test` to run the tests, or `npm run test:watch` to keep them running
+- `npm run build` to make the production build, and `npm run preview` to serve it
 
 Update this section if the commands change.
