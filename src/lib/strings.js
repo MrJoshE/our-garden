@@ -32,6 +32,32 @@ export const strings = {
     submit: 'Start the journal'
   },
 
+  garden: {
+    /** @param {number} count */
+    plants: (count) => (count === 1 ? '1 plant' : `${count.toLocaleString('en-GB')} plants`),
+    /** @param {number} count */
+    needAttention: (count) => (count === 1 ? '1 needs attention' : `${count.toLocaleString('en-GB')} need attention`),
+    filter: 'Show',
+    all: 'All',
+    attention: 'Needs attention',
+    search: 'Search plants',
+    noPlants: {
+      title: 'No plants yet',
+      message: 'Add the plants in this garden, and keep notes and photos for each one as the seasons go.'
+    },
+    noneNeedAttention: {
+      title: 'Nothing needs attention',
+      message: 'No plant has an open problem. Flag one from a plant’s page when you spot something.',
+      action: 'Show all plants'
+    },
+    noResults: {
+      /** @param {string} search */
+      title: (search) => `No plants match “${search}”`,
+      message: 'Try a name, a variety, where it grows or a tag.',
+      action: 'Clear search'
+    }
+  },
+
   installHint: {
     title: 'Add Garden Journal to your Home Screen first, so your journal is kept safe',
     steps: 'Tap the Share button, choose Add to Home Screen, then open Garden Journal from your Home Screen.'

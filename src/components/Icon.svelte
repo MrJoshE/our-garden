@@ -3,6 +3,7 @@
   // here when a component needs a new icon.
   const paths = {
     close: ['M18 6 6 18', 'M6 6l12 12'],
+    search: ['M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z', 'm20 20-4-4'],
     // The one drawing for plants without a photo, and the empty states
     sprig: [
       'M12 21.5c0-5.5-.2-11 0-16',
