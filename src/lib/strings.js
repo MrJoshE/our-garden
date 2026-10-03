@@ -18,6 +18,15 @@ function size(bytes) {
   return sizes[unit].format(value);
 }
 
+/**
+ * @param {number} days since it happened
+ * @param {string} date when it happened, written out
+ * @returns {string} "today", "yesterday", "3 days ago", or "on 14 March 2024" after two weeks
+ */
+function ago(days, date) {
+  return days <= 0 ? 'today' : days === 1 ? 'yesterday' : days < 14 ? `${days} days ago` : `on ${date}`;
+}
+
 export const strings = {
   appName: 'Garden Journal',
   other: 'Other',
@@ -191,14 +200,7 @@ export const strings = {
      * @param {number} days since the plant's last entry
      * @param {string} date that entry's date, written out
      */
-    last: (days, date) =>
-      days <= 0
-        ? 'Last checked today'
-        : days === 1
-          ? 'Last checked yesterday'
-          : days < 14
-            ? `Last checked ${days} days ago`
-            : `Last checked ${date}`
+    last: (days, date) => `Last checked ${ago(days, date)}`
   },
 
   entry: {
@@ -236,6 +238,30 @@ export const strings = {
     save: 'Save',
     cancel: 'Cancel',
     delete: 'Delete entry'
+  },
+
+  backup: {
+    never: 'No backup yet',
+    /**
+     * @param {number} days since the last backup
+     * @param {string} date its date, written out
+     */
+    last: (days, date) => `Last backup ${ago(days, date)}`,
+    hint: 'One file with all your notes and photos. Keep it somewhere safe, away from this device.',
+    export: 'Export',
+    preparing: 'Preparing your backup',
+    /**
+     * @param {number} done
+     * @param {number} total
+     */
+    progress: (done, total) => `${done} of ${total} photos`,
+    ready: 'Your backup is ready',
+    /** @param {number} count */
+    unreadable: (count) =>
+      count === 1
+        ? 'One photo could no longer be read on this device, so the backup leaves it out.'
+        : `${count} photos could no longer be read on this device, so the backup leaves them out.`,
+    save: 'Save backup'
   },
 
   settings: {
