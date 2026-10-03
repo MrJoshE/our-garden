@@ -72,6 +72,7 @@
       await setMeta('lastBackupAt', at);
       lastBackupAt = at;
       ready = null;
+      app.backupReminder = false;
     } catch (error) {
       // She closed the share sheet, or the export outlasted the tap that the
       // share sheet needs: Save backup stays for her to tap

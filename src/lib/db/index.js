@@ -23,7 +23,7 @@ export { listPlants, getPlant, createPlant, updatePlant, deletePlant, restorePla
 export { listEntries, createEntry, updateEntry, deleteEntry, restoreEntry, checkToday } from './entries.js';
 export { listIssues, createIssue, updateIssue, setIssueStatus, deleteIssue, restoreIssue } from './issues.js';
 export { setCoverPhoto } from './photos.js';
-export { BackupError, exportJournal, importJournal } from './backup.js';
+export { BackupError, exportJournal, importJournal, shouldRemindBackup } from './backup.js';
 export { listPeople, getCurrentPerson, updatePerson } from './people.js';
 export * from './areas.js';
 export * from './tasks.js';

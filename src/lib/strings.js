@@ -323,6 +323,12 @@ export const strings = {
     logHint: 'Details of anything that went wrong, to help work out why. They hold no notes, names or photos.'
   },
 
+  backupReminder: {
+    title: 'Time for a backup',
+    message: 'Your newest notes and photos are only on this device. A backup keeps them safe.',
+    action: 'Back up now'
+  },
+
   storage: {
     title: 'Your device is nearly full',
     message: 'Make a backup, then remove some old photos to free space, so new notes and photos can still be saved.'

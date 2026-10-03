@@ -5,6 +5,9 @@
 import { Zip, ZipDeflate, ZipPassThrough, strFromU8, strToU8, unzipSync } from 'fflate';
 import { db, SCHEMA_VERSION } from './schema.js';
 import { write } from './write.js';
+import { getMeta } from './meta.js';
+import { getCurrentPerson } from './people.js';
+import { BACKUP_REMINDER_DAYS } from '../constants.js';
 import { logError } from '../log.js';
 
 const JSON_FILE = 'garden-journal.json';
@@ -210,6 +213,28 @@ export async function importJournal(file, onProgress) {
       const row = meta.find((each) => each.key === key);
       if (row && !(await db.table('meta').get(key))) await db.table('meta').put({ key, value: row.value });
     }
+    // On a device that has never backed up, this file is the journal's last backup
+    if (!Number.isNaN(Date.parse(backup.exportedAt)) && !(await db.table('meta').get('lastBackupAt'))) {
+      await db.table('meta').put({ key: 'lastBackupAt', value: backup.exportedAt });
+    }
     return { added, updated, skipped };
   });
+}
+
+/**
+ * Whether to remind her to back up: once, when the journal has gone
+ * BACKUP_REMINDER_DAYS without a backup and has new entries since.
+ * @param {Date} [now]
+ */
+export async function shouldRemindBackup(now = new Date()) {
+  const [lastBackupAt, remindedAt, person] = await Promise.all([
+    getMeta('lastBackupAt'),
+    getMeta('backupReminderShownAt'),
+    getCurrentPerson()
+  ]);
+  // Never backed up: counted from when the journal began
+  const since = lastBackupAt ?? person?.createdAt;
+  if (!since || (remindedAt && remindedAt > since)) return false;
+  if (now.getTime() - Date.parse(since) < BACKUP_REMINDER_DAYS * 86_400_000) return false;
+  return (await db.entries.filter((entry) => entry.deletedAt == null && entry.createdAt > since).first()) !== undefined;
 }
