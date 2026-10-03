@@ -346,6 +346,15 @@
   }
   .page-narrow { max-width: 720px; }
 
+  /* Banners above the page (an error, later the update notice), lined up
+     with the page's gutters */
+  .banner-area {
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding: calc(var(--space-2) + var(--safe-top)) calc(var(--page-gutter) + var(--safe-right)) 0 calc(var(--page-gutter) + var(--safe-left));
+  }
+
   .page-header {
     display: flex;
     align-items: flex-end;
@@ -1099,7 +1108,10 @@
     animation: fade-in var(--dur-slow) var(--ease-out) both;
   }
   .empty svg { width: 72px; height: 72px; color: var(--sage-300); }
-  .empty h2 { color: var(--color-text); }
+  .empty :is(h1, h2) { color: var(--color-text); }
+  /* A whole-page message (such as "can't save in this browser") is the page's
+     main heading but should not be display size */
+  .empty h1 { font-size: var(--text-2xl); }
   .empty p { max-width: 32ch; }
 
   /* ---- Loading placeholders --------------------------------------------

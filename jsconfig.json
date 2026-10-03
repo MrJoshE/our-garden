@@ -9,7 +9,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "lib": ["es2023", "dom"],
-    "types": []
+    "types": ["svelte"]
   },
   "include": ["src/lib/**/*.js"],
   "exclude": ["src/**/*.test.js"]
