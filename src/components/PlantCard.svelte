@@ -20,7 +20,7 @@
   href={paths.plant(plant.gardenId, plant.id)}
   style:--i={index}
 >
-  <div class="cover">
+  <div class="cover" data-cover={plant.id}>
     {#if thumb}
       <Photo blob={thumb} />
     {:else}
