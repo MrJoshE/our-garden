@@ -1,7 +1,7 @@
 <script>
+  import DayField from './DayField.svelte';
   import Field from './Field.svelte';
   import { ENTRY_KINDS, KINDS_WITH_PRODUCT, LIMITS } from '../lib/constants.js';
-  import { app } from '../lib/state/app.svelte.js';
   import { strings } from '../lib/strings.js';
 
   /**
@@ -55,14 +55,7 @@
 {#if !composer || hasProduct}
 <div class="field-row">
   {#if !composer}
-    <Field
-      label={strings.entry.date}
-      name="occurredOn"
-      type="date"
-      max={app.today}
-      bind:value={() => values.occurredOn || app.today, (date) => (values.occurredOn = date === app.today ? '' : date)}
-      error={errors.occurredOn}
-    />
+    <DayField label={strings.entry.date} name="occurredOn" bind:value={values.occurredOn} error={errors.occurredOn} />
   {/if}
   {#if hasProduct}
     <Field
@@ -87,15 +80,3 @@
     error={errors.issueId}
   />
 {/if}
-
-<style>
-  fieldset {
-    border: 0;
-    padding: 0;
-    margin: 0;
-  }
-  legend {
-    padding: 0;
-    margin-bottom: var(--space-1);
-  }
-</style>

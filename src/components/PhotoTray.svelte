@@ -1,3 +1,11 @@
+<script module>
+  /**
+   * The tray's photos that have finished processing, to keep in a draft or save.
+   * @param {TrayPhoto[]} items
+   */
+  export const readyPhotos = (items) => items.filter((item) => item.status === 'ready');
+</script>
+
 <script>
   import Icon from './Icon.svelte';
   import Photo from './Photo.svelte';

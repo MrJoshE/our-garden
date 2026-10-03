@@ -2,7 +2,7 @@
   import EntryFields from './EntryFields.svelte';
   import Icon from './Icon.svelte';
   import InlineProblem from './InlineProblem.svelte';
-  import PhotoTray from './PhotoTray.svelte';
+  import PhotoTray, { readyPhotos } from './PhotoTray.svelte';
   import { createEntry, getDraft } from '../lib/db/index.js';
   import { ACTIVE_ISSUE_STATUSES } from '../lib/constants.js';
   import { isFuture } from '../lib/dates.js';
@@ -57,7 +57,7 @@
         // Photos join the draft once processed; one still processing can't be picked up again
         draft = keepDraft(key, () => {
           const snapshot = $state.snapshot(values);
-          return { ...snapshot, photos: snapshot.photos.filter((item) => item.status === 'ready') };
+          return { ...snapshot, photos: readyPhotos(snapshot.photos) };
         });
       })
       .catch((error) => logError(error, { operation: 'getDraft' }));
@@ -95,7 +95,7 @@
       // Photos still being processed are waited for, not left behind
       await tray?.settled();
       const { photos: picked, ...fields } = $state.snapshot(values);
-      const photos = picked.filter((item) => item.status === 'ready').map((item) => item.photo);
+      const photos = readyPhotos(picked).map((item) => item.photo);
       await createEntry(plantId, {
         ...fields,
         photos,

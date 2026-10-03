@@ -1,15 +1,17 @@
 <script>
   import Icon from './Icon.svelte';
   import IssueCard from './IssueCard.svelte';
+  import IssueSheet from './IssueSheet.svelte';
   import { ACTIVE_ISSUE_STATUSES } from '../lib/constants.js';
+  import { openSheet, route } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
 
   /**
    * The plant's problems: open and watching ones as cards, resolved ones
-   * folded away underneath (brief section 8).
-   * @type {{ issues: Record<string, any>[] }}
+   * folded away underneath, and a way to flag a new one (brief section 8).
+   * @type {{ issues: Record<string, any>[], plantId: string }}
    */
-  let { issues } = $props();
+  let { issues, plantId } = $props();
 
   const headingId = $props.id();
   const active = $derived(issues.filter((issue) => ACTIVE_ISSUE_STATUSES.includes(issue.status)));
@@ -18,7 +20,13 @@
 </script>
 
 <section class="stack stack-sm" aria-labelledby={headingId}>
-  <h2 class="eyebrow" id={headingId}>{strings.issues.title}</h2>
+  <div class="cluster cluster-between">
+    <h2 class="eyebrow" id={headingId}>{strings.issues.title}</h2>
+    <button class="btn btn-quiet" type="button" onclick={() => openSheet('add-issue')}>
+      <Icon name="plus" />
+      {strings.issues.flag}
+    </button>
+  </div>
   {#each active as issue (issue.id)}
     <IssueCard {issue} />
   {/each}
@@ -42,6 +50,8 @@
     </div>
   {/if}
 </section>
+
+<IssueSheet open={route.sheet === 'add-issue'} {plantId} />
 
 <style>
   /* The fold sits at the start of the column, like the cards above it */

@@ -136,7 +136,7 @@
           </ul>
         {/if}
 
-        {#if issues.value?.length}<IssueList issues={issues.value} />{/if}
+        {#if issues.value}<IssueList issues={issues.value} plantId={details.id} />{/if}
       </div>
 
       <div class="stack stack-lg">
