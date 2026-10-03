@@ -139,6 +139,15 @@ export const strings = {
     yesterday: 'Yesterday'
   },
 
+  issues: {
+    title: 'Problems',
+    reopen: 'Reopen',
+    /** @param {number} count */
+    resolvedGroup: (count) => `Resolved (${count})`,
+    /** @param {number} days since it was first seen */
+    seen: (days) => (days <= 0 ? 'First seen today' : days === 1 ? 'First seen yesterday' : `First seen ${days} days ago`)
+  },
+
   check: {
     button: 'Checked today',
     already: 'Already checked today',
