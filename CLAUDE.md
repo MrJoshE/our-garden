@@ -16,8 +16,8 @@ Every feature or piece of implementation follows the same steps, in this order.
 4. Run `/triage-candidate` and `/josh-analysis` again on what was implemented.
 5. Do the edge case review described below and fix what it finds in the same pull request.
 6. Write the results of steps 4 and 5 in the pull request, including anything you decided not to fix and why.
-7. Merge the pull request and close the issue. There is no need to wait for my approval once steps 4 to 6 are done.
-8. After merging, make sure the main checkout has the latest `main` (a project hook in `.claude/settings.json` pulls it after `gh pr merge`), and remove the worktree with `ExitWorktree`. Then check the open issues and pull requests, and close any issue the merged work satisfies, with a comment that links the pull request.
+7. Merge the pull request and close the issue. There is no need to wait for my approval once steps 4 to 6 are done. From a worktree, merge with `gh pr merge <n> --squash`, then delete the branch with `git push origin --delete <branch>`. Do not use `--delete-branch`: it tries to switch the worktree to `main`, fails, and stops the hook below from running.
+8. After merging, make sure the main checkout has the latest `main` (a project hook in `.claude/settings.json` pulls it after `gh pr merge`). Remove the worktree with `ExitWorktree`: a squash merge makes its commits look unmerged, so once `git diff origin/main` in the worktree shows nothing, remove it with `discard_changes: true`. Then check the open issues and pull requests, and close any issue the merged work satisfies, with a comment that links the pull request.
 
 Until `/josh-analysis` exists, use `/implementation-rigor` in its place.
 
