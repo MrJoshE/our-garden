@@ -12,17 +12,18 @@ Every feature or piece of implementation follows the same steps, in this order.
 
 1. Create a GitHub issue in this repo that describes the feature, what is in scope and how we will know it is done.
 2. Run `/triage-candidate` and `/josh-analysis` on the planned work before writing any code. Add what they find to the issue and adjust the plan.
-3. Create a branch and implement the feature. Open a pull request that links the issue.
+3. Start a Claude Code worktree for the work with `EnterWorktree` (it creates a branch from `origin/main` under `.claude/worktrees/`), run `npm ci` in it, and implement the feature there. Open a pull request that links the issue.
 4. Run `/triage-candidate` and `/josh-analysis` again on what was implemented.
 5. Do the edge case review described below and fix what it finds in the same pull request.
 6. Write the results of steps 4 and 5 in the pull request, including anything you decided not to fix and why.
 7. Merge the pull request and close the issue. There is no need to wait for my approval once steps 4 to 6 are done.
+8. After merging, make sure the main checkout has the latest `main` (a project hook in `.claude/settings.json` pulls it after `gh pr merge`), and remove the worktree with `ExitWorktree`. Then check the open issues and pull requests, and close any issue the merged work satisfies, with a comment that links the pull request.
 
 Until `/josh-analysis` exists, use `/implementation-rigor` in its place.
 
 Keep each issue and pull request to one feature. The five build steps at the end of the brief are the order of work, and each will usually need several issues.
 
-Use the `gh` CLI for issues and pull requests. Do not commit directly to `main`.
+Use the `gh` CLI for issues and pull requests. Do not commit directly to `main`, and leave the main checkout on `main`: all work happens in worktrees.
 
 ## Edge case review
 
