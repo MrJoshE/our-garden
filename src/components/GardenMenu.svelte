@@ -2,7 +2,8 @@
   import Icon from './Icon.svelte';
   import { listGardens } from '../lib/db/index.js';
   import { live } from '../lib/state/live.svelte.js';
-  import { openSheet, paths } from '../lib/state/router.svelte.js';
+  import { reportError, showToast } from '../lib/state/app.svelte.js';
+  import { navigate, openSheet, paths } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
 
   /** @type {{ garden: Record<string, any> }} the garden being looked at */
@@ -29,6 +30,25 @@
   function open(sheet) {
     menu.hidePopover();
     openSheet(sheet);
+  }
+
+  let loadingSample = false;
+
+  // Development only. Loaded on demand, so the sample stays out of the build.
+  async function loadSample() {
+    menu.hidePopover();
+    if (loadingSample) return;
+    loadingSample = true;
+    try {
+      const { loadSampleGarden } = await import('../lib/db/seed.js');
+      const id = await loadSampleGarden();
+      showToast(strings.toasts.gardenAdded);
+      navigate(paths.garden(id));
+    } catch (error) {
+      reportError(error, { operation: 'loadSampleGarden' });
+    } finally {
+      loadingSample = false;
+    }
   }
 </script>
 
@@ -62,4 +82,7 @@
   <div class="menu-divider"></div>
   <button class="menu-item" type="button" onclick={() => open('add-garden')}>{strings.gardenMenu.add}</button>
   <button class="menu-item" type="button" onclick={() => open('edit-garden')}>{strings.gardenMenu.edit}</button>
+  {#if import.meta.env.DEV}
+    <button class="menu-item" type="button" onclick={loadSample}>Load sample garden</button>
+  {/if}
 </div>
