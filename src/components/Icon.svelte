@@ -2,7 +2,10 @@
   // Small inline icons: 1.75 stroke in the current text colour. Add a path
   // here when a component needs a new icon.
   const paths = {
+    check: ['m5 12.5 4.5 4.5L19 7'],
+    chevronDown: ['m6 9 6 6 6-6'],
     close: ['M18 6 6 18', 'M6 6l12 12'],
+    plus: ['M12 5v14', 'M5 12h14'],
     search: ['M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z', 'm20 20-4-4'],
     // The one drawing for plants without a photo, and the empty states
     sprig: [

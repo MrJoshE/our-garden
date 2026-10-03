@@ -12,7 +12,8 @@ export const strings = {
     retry: 'Try again',
     back: 'Go back',
     dismiss: 'Dismiss',
-    close: 'Close'
+    close: 'Close',
+    edit: 'Edit'
   },
 
   form: {
@@ -56,6 +57,66 @@ export const strings = {
       message: 'Try a name, a variety, where it grows or a tag.',
       action: 'Clear search'
     }
+  },
+
+  plantSheet: {
+    addTitle: 'Add a plant',
+    editTitle: 'Edit plant',
+    commonName: 'Name',
+    location: 'Where it grows',
+    status: 'Status',
+    more: 'More details',
+    botanicalName: 'Botanical name',
+    variety: 'Variety',
+    plantedOn: 'Planted',
+    quantity: 'How many',
+    source: 'Where it came from',
+    careNotes: 'Care notes',
+    tags: 'Tags',
+    tagsHint: 'Separate tags with commas.',
+    save: 'Save',
+    add: 'Add plant',
+    cancel: 'Cancel'
+  },
+
+  gardenSheet: {
+    addTitle: 'Add a garden',
+    editTitle: 'Garden details',
+    name: 'Name',
+    status: 'Status',
+    more: 'More details',
+    ownerName: 'Owner',
+    contact: 'Contact',
+    contactHint: 'A phone number or email address.',
+    address: 'Address',
+    soil: 'Soil',
+    aspect: 'Aspect',
+    aspectHint: 'Which way it faces, such as south-west.',
+    notes: 'Notes',
+    save: 'Save',
+    add: 'Add garden',
+    cancel: 'Cancel',
+    delete: 'Delete this garden',
+    /** @param {string} name */
+    confirmLabel: (name) => `To delete it, type “${name}”`,
+    deleteWarning: 'Every plant, note and photo in this garden goes with it, and this can’t be undone.',
+    deleteConfirm: 'Delete garden'
+  },
+
+  gardenMenu: {
+    /** @param {string} name */
+    open: (name) => `${name}, switch garden`,
+    gardens: 'Your gardens',
+    archived: 'Archived',
+    add: 'Add a garden',
+    edit: 'Garden details'
+  },
+
+  toasts: {
+    saved: 'Saved',
+    plantAdded: 'Plant added',
+    gardenAdded: 'Garden added',
+    gardenDeleted: 'Garden deleted'
   },
 
   installHint: {

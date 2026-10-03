@@ -335,6 +335,23 @@
   }
   .appbar.is-scrolled .appbar-title { opacity: 1; transform: none; }
   .appbar-actions { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+  /* The garden's name in the app bar, which opens the garden menu */
+  .appbar-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+    min-height: var(--tap);
+    margin-inline-start: calc(var(--space-2) * -1);
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-soft);
+  }
+  /* One line, as a native title bar; the page heading shows the whole name */
+  .appbar-switcher .eyebrow { overflow: hidden; color: inherit; text-overflow: ellipsis; white-space: nowrap; }
+  .appbar-switcher svg { width: 1em; height: 1em; flex: none; }
+  .appbar-switcher:active { background: var(--color-surface-sunken); }
+  @media (hover: hover) { .appbar-switcher:hover { background: var(--color-surface-sunken); } }
 
   .page {
     flex: 1;
@@ -486,6 +503,9 @@
   .btn-sm::before, .toast .btn::before { content: ''; position: absolute; inset: calc((var(--tap) - var(--tap-sm)) / -2) 0; }
   .btn-lg { min-height: var(--tap-lg); padding-inline: var(--space-6); font-size: var(--text-lg); }
   .btn-block { display: flex; width: 100%; }
+  /* A button that shows or hides a section points its chevron the way it will go */
+  .btn[aria-expanded] svg { transition: rotate var(--dur-base) var(--ease-out); }
+  .btn[aria-expanded='true'] svg { rotate: 180deg; }
 
   .btn-icon {
     width: var(--tap);
@@ -1033,13 +1053,20 @@
     gap: var(--space-3);
     width: 100%;
     min-height: var(--tap);
-    padding: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-md);
     text-align: left;
     text-decoration: none;
     font-weight: var(--weight-medium);
+    overflow-wrap: anywhere;
   }
-  .menu-item:active, .menu-item[aria-current='true'] { background: var(--color-surface-sunken); }
+  .menu-item:active, .menu-item[aria-current='true'], .menu-item[aria-current='page'] { background: var(--color-surface-sunken); }
+  .menu-item svg { width: 1.2em; height: 1.2em; flex: none; }
+  /* A small label at the top of a menu */
+  .menu-heading { padding: var(--space-2) var(--space-3) var(--space-1); }
+  /* A menu shown with the popover attribute opens where its script places it
+     (top and left), under the button that opened it */
+  .menu[popover] { position: fixed; inset: auto; margin: var(--space-1) 0 0; transform-origin: top left; }
   @media (hover: hover) { .menu-item:hover { background: var(--color-surface-sunken); } }
   .menu-item.is-danger { color: var(--tone-danger-fg); }
   .menu-divider { height: 1px; margin: var(--space-1) var(--space-2); background: var(--color-border); }
@@ -1084,6 +1111,10 @@
     animation: toast-in var(--dur-slow) var(--ease-spring) both;
   }
   .toast.is-leaving { animation: toast-out var(--dur-base) var(--ease-in) forwards; }
+  /* On phones, toasts sit above the floating Add button rather than over it */
+  @media (max-width: 899px) {
+    body:has(.fab) .toast-region { bottom: calc(var(--space-5) + var(--tap-lg) + var(--space-3) + var(--safe-bottom)); }
+  }
   .toast > span { flex: 1; padding-block: var(--space-1); }
   .toast .btn { min-height: var(--tap-sm); background: transparent; border-color: rgb(255 255 255 / 0.3); color: var(--sage-300); }
   .toast[data-tone='danger'] { background: var(--tone-danger-fg); color: #fff; }
@@ -1114,7 +1145,7 @@
     color: var(--color-text-muted);
     animation: fade-in var(--dur-slow) var(--ease-out) both;
   }
-  .empty svg { width: 72px; height: 72px; color: var(--sage-300); }
+  .empty > svg { width: 72px; height: 72px; color: var(--sage-300); }
   .empty :is(h1, h2) { color: var(--color-text); }
   /* A whole-page message (such as "can't save in this browser") is the page's
      main heading but should not be display size */

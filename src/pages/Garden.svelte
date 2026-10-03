@@ -8,12 +8,15 @@
   import { explainError } from '../lib/errors.js';
   import { plantMatches } from '../lib/search.js';
   import { live } from '../lib/state/live.svelte.js';
-  import { paths, route, setView } from '../lib/state/router.svelte.js';
+  import { openSheet, paths, route, setView } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
   import AppBar from '../components/AppBar.svelte';
+  import GardenMenu from '../components/GardenMenu.svelte';
+  import GardenSheet from '../components/GardenSheet.svelte';
   import Icon from '../components/Icon.svelte';
   import NotFound from '../components/NotFound.svelte';
   import PlantCard from '../components/PlantCard.svelte';
+  import PlantSheet from '../components/PlantSheet.svelte';
   import ProblemScreen from '../components/ProblemScreen.svelte';
 
   // The brief shows the search box only for more than eight plants
@@ -75,7 +78,7 @@
   <NotFound href={paths.start} label={strings.navigation.toGardens} />
 {:else if garden.value}
   <AppBar>
-    <span class="eyebrow">{garden.value.name}</span>
+    <GardenMenu garden={garden.value} />
   </AppBar>
 
   <main class="page">
@@ -89,6 +92,13 @@
           </p>
         {/if}
       </div>
+      <!-- An empty garden has its own Add plant button, in the empty state -->
+      {#if all.length}
+        <button class="btn btn-primary only-wide" type="button" onclick={() => openSheet('add-plant')}>
+          <Icon name="plus" />
+          {strings.plantSheet.add}
+        </button>
+      {/if}
     </div>
 
     {#if searchable}
@@ -130,6 +140,10 @@
         <Icon name="sprig" />
         <h2>{strings.garden.noPlants.title}</h2>
         <p>{strings.garden.noPlants.message}</p>
+        <button class="btn btn-primary" type="button" onclick={() => openSheet('add-plant')}>
+          <Icon name="plus" />
+          {strings.plantSheet.add}
+        </button>
       </div>
     {:else if shown.length === 0 && searching}
       <div class="empty">
@@ -155,4 +169,15 @@
       </div>
     {/if}
   </main>
+
+  {#if all.length}
+    <button class="btn btn-primary fab" type="button" onclick={() => openSheet('add-plant')}>
+      <Icon name="plus" />
+      {strings.plantSheet.add}
+    </button>
+  {/if}
+
+  <PlantSheet open={route.sheet === 'add-plant'} gardenId={garden.value.id} />
+  <GardenSheet open={route.sheet === 'add-garden'} />
+  <GardenSheet open={route.sheet === 'edit-garden'} garden={garden.value} />
 {/if}

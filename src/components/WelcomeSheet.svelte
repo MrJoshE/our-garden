@@ -1,10 +1,10 @@
 <script>
-  import { tick } from 'svelte';
   import Field from './Field.svelte';
+  import FormProblem from './FormProblem.svelte';
   import InstallHint from './InstallHint.svelte';
   import Sheet from './Sheet.svelte';
   import { createFirstGarden } from '../lib/db/index.js';
-  import { explainError } from '../lib/errors.js';
+  import { focusFirstProblem, saveFailure } from '../lib/forms.js';
   import { LIMITS } from '../lib/constants.js';
   import { navigate, paths } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
@@ -15,11 +15,6 @@
   /** @type {import('../lib/errors.js').Explanation | null} */
   let problem = $state(null);
   let saving = $state(false);
-
-  async function focusFirstProblem() {
-    await tick();
-    /** @type {HTMLElement | null} */ (document.querySelector('dialog[open] [aria-invalid="true"]'))?.focus();
-  }
 
   /** @param {SubmitEvent} event */
   async function submit(event) {
@@ -37,12 +32,9 @@
       navigator.storage?.persist?.().catch(() => {});
       navigate(paths.garden(gardenId), { replace: true });
     } catch (error) {
-      const explanation = explainError(error);
-      if (explanation.field === 'personName' || explanation.field === 'gardenName') {
-        errors[explanation.field] = explanation.fieldMessage ?? '';
-      } else {
-        problem = explanation;
-      }
+      const failure = saveFailure(error, ['personName', 'gardenName']);
+      if (failure.field === 'personName' || failure.field === 'gardenName') errors[failure.field] = failure.message;
+      problem = failure.problem;
       saving = false;
       focusFirstProblem();
     }
@@ -53,14 +45,7 @@
   <div class="stack">
     <InstallHint />
     <p class="muted">{strings.welcome.intro}</p>
-    {#if problem}
-      <div class="banner" data-tone="danger" role="alert">
-        <div class="grow">
-          <strong>{problem.title}</strong>
-          {problem.message}
-        </div>
-      </div>
-    {/if}
+    {#if problem}<FormProblem {problem} />{/if}
     <Field
       label={strings.welcome.personName}
       name="personName"

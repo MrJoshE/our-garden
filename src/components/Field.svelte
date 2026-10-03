@@ -2,18 +2,31 @@
   import { strings } from '../lib/strings.js';
 
   /**
-   * A labelled text input or textarea with its error underneath. Other
-   * attributes (name, type, autocomplete, autofocus…) go to the control.
+   * A labelled input, textarea or select with its error and any hint
+   * underneath. Other attributes (name, type, autocomplete, autofocus…) go
+   * to the control.
    * @type {{
    *   label: string,
    *   value: string,
    *   error?: string,
+   *   hint?: string,
    *   maxlength?: number,
    *   optional?: boolean,
-   *   multiline?: boolean
+   *   multiline?: boolean,
+   *   options?: { value: string, label: string }[]
    * } & Record<string, any>}
    */
-  let { label, value = $bindable(''), error = '', maxlength, optional = false, multiline = false, ...rest } = $props();
+  let {
+    label,
+    value = $bindable(''),
+    error = '',
+    hint = '',
+    maxlength,
+    optional = false,
+    multiline = false,
+    options,
+    ...rest
+  } = $props();
 
   const id = $props.id();
   // Only near the limit is the count worth the space
@@ -31,7 +44,18 @@
     {label}
     {#if optional}<span class="optional">{strings.form.optional}</span>{/if}
   </label>
-  {#if multiline}
+  {#if options}
+    <select
+      {id}
+      class="select"
+      bind:value
+      aria-invalid={error ? 'true' : undefined}
+      aria-describedby={error ? `${id}-error` : undefined}
+      {...rest}
+    >
+      {#each options as option (option.value)}<option value={option.value}>{option.label}</option>{/each}
+    </select>
+  {:else if multiline}
     <textarea
       {id}
       class="textarea"
@@ -52,6 +76,7 @@
       {...rest}
     />
   {/if}
+  {#if hint}<p class="hint">{hint}</p>{/if}
   {#if showCount && maxlength !== undefined}
     <p class="hint">{strings.form.count(value.length, maxlength)}</p>
   {/if}
