@@ -39,8 +39,11 @@
   async function animateClose() {
     closing = true;
     await tick();
+    // The page holding the sheet can go while it closes, such as after deleting a garden
+    if (!dialog) return;
     // The dialog's own animations only: a busy button's spinner never finishes
     await Promise.allSettled(dialog.getAnimations().map((animation) => animation.finished));
+    if (!dialog) return;
     dialog.close();
     closing = false;
     if (open) dialog.showModal();

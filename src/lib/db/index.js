@@ -8,6 +8,7 @@ import { logError } from '../log.js';
 export { ValidationError } from './fields.js';
 export { MissingRecordError, AutomaticEntryError } from './write.js';
 export { getMeta, setMeta } from './meta.js';
+export { getDraft, saveDraft, clearDraft } from './drafts.js';
 export {
   listGardens,
   getGarden,

@@ -2,9 +2,10 @@
   import { getGarden, getPlant } from '../lib/db/index.js';
   import { explainError } from '../lib/errors.js';
   import { live } from '../lib/state/live.svelte.js';
-  import { paths, route } from '../lib/state/router.svelte.js';
+  import { openSheet, paths, route } from '../lib/state/router.svelte.js';
   import { strings } from '../lib/strings.js';
   import NotFound from '../components/NotFound.svelte';
+  import PlantSheet from '../components/PlantSheet.svelte';
   import ProblemScreen from '../components/ProblemScreen.svelte';
 
   const garden = live(() => route.gardenId ?? '', getGarden);
@@ -32,5 +33,7 @@
   <main class="page">
     <a href={paths.garden(garden.value.id)}>{garden.value.name}</a>
     <h1 tabindex="-1">{plant.value.commonName}</h1>
+    <button class="btn" type="button" onclick={() => openSheet('edit-plant')}>{strings.actions.edit}</button>
   </main>
+  <PlantSheet open={route.sheet === 'edit-plant'} gardenId={garden.value.id} plantId={plant.value.id} />
 {/if}

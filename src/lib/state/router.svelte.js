@@ -121,9 +121,19 @@ async function changePage(apply, direction, scroll, animate) {
   const update = async () => {
     apply();
     await tick();
+    // A page draws when its data arrives, usually within a few milliseconds.
+    // Waiting briefly for its heading lets the transition show the page, not
+    // a blank one; the old page stays on screen meanwhile.
+    if (animate) await waitUntil(() => !!document.querySelector('main h1'), PAGE_WAIT_MS);
   };
-  if (animate && document.startViewTransition) await document.startViewTransition(update).updateCallbackDone;
-  else await update();
+  if (animate && document.startViewTransition) {
+    const transition = document.startViewTransition(update);
+    // A newer page change skips this transition, which rejects `ready`
+    transition.ready.catch(() => {});
+    await transition.updateCallbackDone;
+  } else {
+    await update();
+  }
   const current = () => change === pageChanges;
   whenReady(
     () => !current() || document.documentElement.scrollHeight - innerHeight >= scroll,
@@ -137,6 +147,23 @@ async function changePage(apply, direction, scroll, animate) {
       if (current() && h1 instanceof HTMLElement) h1.focus({ preventScroll: true });
     }
   );
+}
+
+const PAGE_WAIT_MS = 300;
+
+/**
+ * Resolves once `isReady` holds, or after `limit` milliseconds. Polls with
+ * timers, because the browser pauses animation frames while a view
+ * transition's update runs.
+ * @param {() => boolean} isReady
+ * @param {number} limit
+ */
+function waitUntil(isReady, limit) {
+  const start = performance.now();
+  return new Promise((resolve) => {
+    const check = () => (isReady() || performance.now() - start > limit ? resolve(undefined) : setTimeout(check, 10));
+    check();
+  });
 }
 
 /**
